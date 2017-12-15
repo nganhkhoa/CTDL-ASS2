@@ -50,6 +50,7 @@
                   "cwd": "${workspaceRoot}/resource",
                   "environment": [],
                   "externalConsole": true,
+                  "preLaunchTask": "build",
                   "linux": {
                         "program": "${workspaceRoot}/bin/dsa171a2_TEST",
                         "MIMode": "gdb",
