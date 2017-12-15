@@ -32,6 +32,9 @@ class logger {
 
             _console = spdlog::get("console.log");
             _file    = spdlog::get("file.log");
+
+            _console->set_pattern("[ %H:%M:%S.%F ]\n    >> %v");
+            _file->set_pattern("[%H:%M:%S.%F]\n    >> %v");
             _console->info("Logging system initialized");
             _file->info("Logging system initialized");
       }
