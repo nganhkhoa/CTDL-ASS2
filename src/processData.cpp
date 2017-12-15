@@ -12,6 +12,11 @@
 #include <requestLib.h>
 #include <dbLib.h>
 
+#ifndef NDEBUG
+#include <spdlog/spdlog.h>
+#include <logger.h>
+#endif
+
 using namespace std;
 
 #define GPS_DISTANCE_ERROR 0.005
@@ -34,5 +39,11 @@ bool processRequest(
    void*              pGData) {
       // TODO: Your code goes here
       // return false for invlaid events
+      auto logger  = logger::get();
+      auto console = logger->console();
+      auto file    = logger->file();
+
+      console->info("processing request {}", request.code);
+      file->info("processing request {}", request.code);
       return true;
 }

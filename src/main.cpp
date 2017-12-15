@@ -1,9 +1,12 @@
 #include <iostream>
-#ifndef NDEBUG
-#include <spdlog/spdlog.h>
-#endif
 #ifdef UNITTEST
 #include <gtest/gtest.h>
+#endif
+
+#ifndef NDEBUG
+#include <spdlog/spdlog.h>
+#include <logger.h>
+logger* logger::_logger = nullptr;
 #endif
 
 #include <dsaLib.h>
@@ -11,7 +14,6 @@
 #include <dbLib.h>
 
 using namespace std;
-
 
 /// This function displays the content of database
 void display(L1List<VM_Record>& bList) {
@@ -21,24 +23,10 @@ void display(L1List<VM_Record>& bList) {
 
 int main(int narg, char** argv) {
 #ifndef NDEBUG
-      // setup loggers
-      try {
-            // set async mode
-            spdlog::set_async_mode(8192);
-            // create two logger for console and file
-            auto console = spdlog::stdout_color_mt("console.log");
-            auto file    = spdlog::rotating_logger_mt(
-               "file.log", "logs/log.txt", 1024 * 1024 * 5, 3);
-
-            spdlog::drop_all();
-      } catch (const spdlog::spdlog_ex& ex) {
-            cout << "Some error occured\n";
-            return 255;
-      }
-      auto console = spdlog::get("console.log");
-      auto file    = spdlog::get("file.log");
-      console->info("Logging system initialized");
-      file->info("Logging system initialized");
+      logger::init();
+      auto logger  = logger::get();
+      auto console = logger->console();
+      auto file    = logger->file();
 #endif    // DEBUG
 #ifndef UNITTEST
       L1List<VM_Request> requestList;
@@ -59,16 +47,23 @@ int main(int narg, char** argv) {
       cout << fixed << setprecision(12);    // preset for floating point numbers
 
 #ifndef NDEBUG
-      console->info("Begin processing events");
-      file->info("Begin processing events");
+      console->info(
+         "Begin processing {} events with {} records",
+         requestList.getSize(),
+         db.getSize());
+      file->info(
+         "Begin processing {} events with {} records",
+         requestList.getSize(),
+         db.getSize());
 #endif
       process(requestList, db);
 
       cout << resetiosflags(ios::showbase) << setprecision(-1);
 
 #ifndef NDEBUG
-      console->info("All operation done");
-      file->info("All operation done");
+      console->info("All operations done");
+      file->info("All operations done");
+      delete logger;
 #endif
       return 0;
 #else    // UNITTEST

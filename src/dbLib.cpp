@@ -21,6 +21,11 @@
 #define __PI 3.14159265358979323846
 #define earthRadiusKm 6371.0
 
+#ifndef NDEBUG
+#include <spdlog/spdlog.h>
+#include <logger.h>
+#endif
+
 using namespace std;
 
 void strPrintTime(char* des, time_t& t) {
@@ -63,10 +68,46 @@ void loadVMDB(char* fName, L1List<VM_Record>& db) {
 
 bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
       // TODO: write code to parse a record from given line
+      struct tm thisTime;
+      int       rev = 0;
+
+      const char* temp = pBuf;
+
+      if (
+         sscanf(
+            temp,
+            "%d,%d/%d/%d %d:%d:%d,%10[a-zA-Z0-9],%lF,%lF,%*s",
+            &rev,
+            &thisTime.tm_mon,
+            &thisTime.tm_mday,
+            &thisTime.tm_year,
+            &thisTime.tm_hour,
+            &thisTime.tm_min,
+            &thisTime.tm_sec,
+            bInfo.id,
+            &bInfo.longitude,
+            &bInfo.latitude) != 10)
+            return false;
+
+      thisTime.tm_year -= 1900;
+      thisTime.tm_mon -= 1;
+      thisTime.tm_isdst = -1;
+
+      bInfo.timestamp = timegm(&thisTime);
+
+      size_t idlength = strlen(bInfo.id);
+      if (idlength < 4) {
+            memmove(bInfo.id + 4 - idlength, bInfo.id, 4);
+            for (; idlength < 4; ++idlength) {
+                  bInfo.id[4 - idlength - 1] = '0';
+            }
+      }
+
+      return true;
 }
 
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& rList) {
-      void* pGData = NULL;
+      void* pGData = nullptr;
       initVMGlobalData(&pGData);
 
       while (!requestList.isEmpty()) {
