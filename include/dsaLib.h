@@ -246,6 +246,13 @@ struct AVLNode
       AVLNode(T& a)
           : _data(a), _pLeft(nullptr), _pRight(nullptr), _bFactor(0) {}
 #endif
+
+      void calibrate() {
+            this->_height = [](int a, int b) { return a > b ? a : b; }(
+                               (_pLeft ? _pLeft->_height : 0),
+                               (_pRight ? _pRight->_height : 0)) +
+                            1;
+      }
 };
 
 template <class T>
@@ -286,6 +293,23 @@ class AVLTree {
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLRN(AVLNode<T>* pR, void (*op)(T&));
 
+#ifdef UNITTEST
+    public:
+      L1List<AVLNode<T>*>* getListNode() {
+            auto list = new L1List<AVLNode<T>*>();
+            _getListNode(_pRoot, list);
+            list->reverse();
+            return list;
+      }
+      void _getListNode(AVLNode<T>* pR, L1List<AVLNode<T>*>* list) {
+            if (!pR)
+                  return;
+            list->insertHead(pR);
+            _getListNode(pR->_pLeft, list);
+            _getListNode(pR->_pRight, list);
+      }
+#endif
+
       void rotLeft(AVLNode<T>*& pR);
       void rotRight(AVLNode<T>*& pR);
       void rotLR(AVLNode<T>*& pR);
@@ -293,6 +317,153 @@ class AVLTree {
 
       bool balanceLeft(AVLNode<T>*& pR);
       bool balanceRight(AVLNode<T>*& pR);
+      bool balance(AVLNode<T>*& pR);
 };
+
+template <class T>
+void AVLTree<T>::destroy(AVLNode<T>*& n) {
+      // remove node
+}
+
+template <class T>
+void AVLTree<T>::rotLeft(AVLNode<T>*& n) {
+      auto temp     = n;
+      n             = n->_pRight;
+      temp->_pRight = n->_pLeft;
+      n->_pLeft     = temp;
+
+      temp->calibrate();
+      n->calibrate();
+      temp = nullptr;
+}
+
+template <class T>
+void AVLTree<T>::rotRight(AVLNode<T>*& n) {
+      auto temp    = n;
+      n            = n->_pLeft;
+      temp->_pLeft = n->_pRight;
+      n->_pRight   = temp;
+
+      temp->calibrate();
+      n->calibrate();
+      temp = nullptr;
+}
+
+template <class T>
+void AVLTree<T>::rotLR(AVLNode<T>*& n) {
+      rotLeft(n->_pLeft);
+      rotRight(n);
+}
+
+template <class T>
+void AVLTree<T>::rotRL(AVLNode<T>*& n) {
+      rotRight(n->_pRight);
+      rotLeft(n);
+}
+
+template <class T>
+bool AVLTree<T>::balanceLeft(AVLNode<T>*& n) {
+      // right of left height
+      int rlh = n->_pLeft->_pRight ? n->_pLeft->_pRight->_height : 0;
+      // left of left height
+      int llh = n->_pLeft->_pLeft ? n->_pLeft->_pLeft->_height : 0;
+
+      switch (rlh - llh) {
+            case 1:
+                  rotLR(n->_pRight);
+                  return true;
+            case -1:
+                  rotRight(n);
+                  return true;
+            default:
+                  return false;
+      }
+      return false;
+}
+
+template <class T>
+bool AVLTree<T>::balanceRight(AVLNode<T>*& n) {
+      // right of right height
+      int rrh = n->_pRight->_pRight ? n->_pRight->_pRight->_height : 0;
+      // left of right height
+      int lrh = n->_pRight->_pLeft ? n->_pRight->_pLeft->_height : 0;
+
+      switch (rrh - lrh) {
+            case -1:
+                  rotRL(n->_pRight);
+                  rotLeft(n);
+                  return true;
+            case 1:
+                  rotLeft(n);
+                  return true;
+            default:
+                  return false;
+      }
+      return false;
+}
+
+
+template <class T>
+bool AVLTree<T>::balance(AVLNode<T>*& n) {
+      int leftHeight  = n->_pLeft ? n->_pLeft->_height : 0;
+      int rightHeight = n->_pRight ? n->_pRight->_height : 0;
+
+      switch (rightHeight - leftHeight) {
+            case 2:
+                  return balanceRight(n);
+            case -2:
+                  return balanceLeft(n);
+            default:
+                  return false;
+      }
+      return false;
+}
+
+template <class T>
+bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
+      if (n == nullptr) {
+            n = new AVLNode<T>(t);
+            return true;
+      }
+
+      if (t < n->_data) {
+            insert(n->_pLeft, t);
+      }
+      else {
+            insert(n->_pRight, t);
+      }
+
+      n->calibrate();
+      return balance(n);
+}
+
+
+template <class T>
+void AVLTree<T>::traverseNLR(AVLNode<T>* pR, void (*op)(T&)) {
+      if (!pR)
+            return;
+
+      op(pR->_data);
+      traverseNLR(pR->_pLeft);
+      traverseNLR(pR->_pRight);
+}
+template <class T>
+void AVLTree<T>::traverseLNR(AVLNode<T>* pR, void (*op)(T&)) {
+      if (!pR)
+            return;
+
+      traverseNLR(pR->_pLeft);
+      op(pR->_data);
+      traverseNLR(pR->_pRight);
+}
+template <class T>
+void AVLTree<T>::traverseLRN(AVLNode<T>* pR, void (*op)(T&)) {
+      if (!pR)
+            return;
+
+      traverseNLR(pR->_pLeft);
+      traverseNLR(pR->_pRight);
+      op(pR->_data);
+}
 
 #endif    // A02_DSALIB_H
