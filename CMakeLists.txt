@@ -54,7 +54,7 @@ set(CMAKE_CXX_FLAGS ${WARNING}\ ${PUBLIC}\ ${IDENTIFIER}\ ${CPPVERSION}\ ${LINKE
 
       if(TEST)
             add_definitions(-DUNITTEST)
-            set (google_test "${PROJECT_ROOT_DIR}/include/googletest")
+            set (google_test "${PROJECT_ROOT_DIR}/include/googletest/googletest")
             include_directories(${google_test})
             include_directories(${google_test}/include)
             add_subdirectory("test")
