@@ -1,12 +1,15 @@
 {
       "version": "0.2.0",
-      "configurations": [{
-                  "name": "project",
+      "configurations": [
+            {
+                  "name": "launch",
                   "type": "cppdbg",
                   "request": "launch",
-
                   "preLaunchTask": "build",
-                  "args": [],
+                  "args": [
+                        "request.txt",
+                        "data.csv"
+                  ],
                   "stopAtEntry": false,
                   "cwd": "${workspaceRoot}/resource",
                   "environment": [],
@@ -14,11 +17,13 @@
                   "linux": {
                         "program": "${workspaceRoot}/bin/dsa171a2",
                         "MIMode": "gdb",
-                        "setupCommands": [{
-                              "description": "Enable pretty-printing for gdb",
-                              "text": "-enable-pretty-printing",
-                              "ignoreFailures": true
-                        }]
+                        "setupCommands": [
+                              {
+                                    "description": "Enable pretty-printing for gdb",
+                                    "text": "-enable-pretty-printing",
+                                    "ignoreFailures": true
+                              }
+                        ]
                   },
                   "osx": {
                         "MIMode": "lldb"
@@ -27,11 +32,13 @@
                         "program": "${workspaceRoot}/bin/dsa171a2.exe",
                         "MIMode": "gdb",
                         "miDebuggerPath": "C:\\Program Files (x86)\\mingw-w64\\i686-7.1.0-posix-dwarf-rt_v5-rev0\\mingw32\\bin\\gdb.exe",
-                        "setupCommands": [{
-                              "description": "Enable pretty-printing for gdb",
-                              "text": "-enable-pretty-printing",
-                              "ignoreFailures": true
-                        }]
+                        "setupCommands": [
+                              {
+                                    "description": "Enable pretty-printing for gdb",
+                                    "text": "-enable-pretty-printing",
+                                    "ignoreFailures": true
+                              }
+                        ]
                   }
             },
             {
@@ -46,11 +53,13 @@
                   "linux": {
                         "program": "${workspaceRoot}/bin/dsa171a2_TEST",
                         "MIMode": "gdb",
-                        "setupCommands": [{
-                              "description": "Enable pretty-printing for gdb",
-                              "text": "-enable-pretty-printing",
-                              "ignoreFailures": true
-                        }]
+                        "setupCommands": [
+                              {
+                                    "description": "Enable pretty-printing for gdb",
+                                    "text": "-enable-pretty-printing",
+                                    "ignoreFailures": true
+                              }
+                        ]
                   },
                   "osx": {
                         "MIMode": "lldb"
@@ -59,11 +68,13 @@
                         "program": "${workspaceRoot}/bin/dsa171a2_TEST.exe",
                         "MIMode": "gdb",
                         "miDebuggerPath": "C:\\Program Files (x86)\\mingw-w64\\i686-7.1.0-posix-dwarf-rt_v5-rev0\\mingw32\\bin\\gdb.exe",
-                        "setupCommands": [{
-                              "description": "Enable pretty-printing for gdb",
-                              "text": "-enable-pretty-printing",
-                              "ignoreFailures": true
-                        }]
+                        "setupCommands": [
+                              {
+                                    "description": "Enable pretty-printing for gdb",
+                                    "text": "-enable-pretty-printing",
+                                    "ignoreFailures": true
+                              }
+                        ]
                   }
             }
       ]
