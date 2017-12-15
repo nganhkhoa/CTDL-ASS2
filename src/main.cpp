@@ -67,7 +67,7 @@ int main(int narg, char** argv) {
 #endif
       return 0;
 #else    // UNITTEST
-      testing::InitGoogleTest(&argc, argv);
+      testing::InitGoogleTest(&narg, argv);
       return RUN_ALL_TESTS();
 #endif
 }
