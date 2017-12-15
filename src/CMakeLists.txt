@@ -1,9 +1,7 @@
 
 set (SOURCES 
       "main.cpp"
-      "debug.cpp"
       "dbLib.cpp"
-      "debug.cpp"
       "processData.cpp"
       "requestLib.cpp"
 )
