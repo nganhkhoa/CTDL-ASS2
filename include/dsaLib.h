@@ -41,8 +41,8 @@ struct L1Item
 {
       T          data;
       L1Item<T>* pNext;
-      L1Item() : pNext(NULL) {}
-      L1Item(T& a) : data(a), pNext(NULL) {}
+      L1Item() : pNext(nullptr) {}
+      L1Item(T& a) : data(a), pNext(nullptr) {}
 };
 
 template <class T>
@@ -50,14 +50,15 @@ class L1List {
       L1Item<T>* _pHead;    // The head pointer of linked list
       size_t     _size;     // number of elements in this list
     public:
-      L1List() : _pHead(NULL), _size(0) {}
+      L1List() : _pHead(nullptr), _size(0) {}
       ~L1List();
 
       void clean();
-      bool isEmpty() {
-            return _pHead == NULL;
+
+      inline bool isEmpty() {
+            return _pHead == nullptr;
       }
-      size_t getSize() {
+      inline size_t getSize() const {
             return _size;
       }
 
@@ -99,7 +100,7 @@ class L1List {
 /// Return 0 if success
 template <class T>
 int L1List<T>::push_back(T& a) {
-      if (_pHead == NULL) {
+      if (_pHead == nullptr) {
             _pHead = new L1Item<T>(a);
       }
       else {
@@ -151,16 +152,82 @@ int L1List<T>::removeLast() {
                         pcur = pcur->pNext;
                   }
                   delete pcur;
-                  prev->pNext = NULL;
+                  prev->pNext = nullptr;
             }
             else {
                   delete _pHead;
-                  _pHead = NULL;
+                  _pHead = nullptr;
             }
             _size--;
             return 0;
       }
       return -1;
+}
+
+template <class T>
+L1List<T>::~L1List() {
+      clean();
+      _pHead = nullptr;
+}
+
+template <class T>
+void L1List<T>::clean() {
+      while (_pHead)
+            removeHead();
+}
+
+template <class T>
+T& L1List<T>::at(int i) {
+      if (i < 0 || i >= (int) getSize())
+            throw new DSAException(1, "Index out of range");
+
+      auto* temp = _pHead;
+      while (i--)
+            temp = temp->pNext;
+      return temp->data;
+}
+
+template <class T>
+T& L1List<T>::operator[](int i) {
+      return at(i);
+}
+
+template <class T>
+bool L1List<T>::find(T& a, int& idx) {
+      if (isEmpty())
+            return false;
+
+      auto temp = _pHead;
+      int  i    = 0;
+      while (temp) {
+            if (temp->data == a) {
+                  idx = i;
+                  return true;
+            }
+            i++;
+            temp = temp->pNext;
+      }
+      idx = -1;
+      return false;
+}
+
+template <class T>
+void L1List<T>::reverse() {
+      if (isEmpty())
+            return;
+
+      L1Item<T>* prev = NULL;
+      L1Item<T>* next = _pHead;
+
+      while (_pHead) {
+            next = next->pNext;
+
+            _pHead->pNext = prev;
+
+            prev   = _pHead;
+            _pHead = next;
+      }
+      _pHead = prev;
 }
 
 /************************************************************************
@@ -173,10 +240,11 @@ struct AVLNode
       AVLNode<T>*_pLeft, *_pRight;
 #ifdef AVL_USE_HEIGHT
       int _height;
-      AVLNode(T& a) : _data(a), _pLeft(NULL), _pRight(NULL), _height(1) {}
+      AVLNode(T& a) : _data(a), _pLeft(nullptr), _pRight(nullptr), _height(1) {}
 #else
       int _bFactor;
-      AVLNode(T& a) : _data(a), _pLeft(NULL), _pRight(NULL), _bFactor(0) {}
+      AVLNode(T& a)
+          : _data(a), _pLeft(nullptr), _pRight(nullptr), _bFactor(0) {}
 #endif
 };
 
@@ -185,7 +253,7 @@ class AVLTree {
       AVLNode<T>* _pRoot;
 
     public:
-      AVLTree() : _pRoot(NULL) {}
+      AVLTree() : _pRoot(nullptr) {}
       ~AVLTree() {
             destroy(_pRoot);
       }
