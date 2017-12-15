@@ -37,13 +37,17 @@ bool processRequest(
    VM_Request&        request,
    L1List<VM_Record>& recordList,
    void*              pGData) {
-      // TODO: Your code goes here
-      // return false for invlaid events
+// TODO: Your code goes here
+// return false for invlaid events
+
+#ifndef NDEBUG
       auto logger  = logger::get();
       auto console = logger->console();
       auto file    = logger->file();
-
       console->info("processing request {}", request.code);
       file->info("processing request {}", request.code);
+#endif
+
+
       return true;
 }
