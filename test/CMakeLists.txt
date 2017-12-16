@@ -1,5 +1,5 @@
 set (SOME_TEST
-      "demo.cpp"
+      "AVL.cpp"
 )
 
 add_library (TESTING OBJECT ${SOME_TEST})
