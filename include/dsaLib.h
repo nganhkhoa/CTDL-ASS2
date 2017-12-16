@@ -263,7 +263,11 @@ class AVLTree {
 #endif
 
     public:
-      AVLTree() : _pRoot(nullptr) {}
+      AVLTree() : _pRoot(nullptr) {
+#ifndef NDEBUG
+            size = 0;
+#endif
+      }
       ~AVLTree() {
             destroy(_pRoot);
       }
@@ -302,7 +306,7 @@ class AVLTree {
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLRN(AVLNode<T>* pR, void (*op)(T&));
 
-#ifdef UNITTEST
+#if defined UNITTEST || !defined NDEBUG
     public:
       L1List<AVLNode<T>*>* getListNode() {
             auto list = new L1List<AVLNode<T>*>();
@@ -431,6 +435,9 @@ template <class T>
 bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
       if (n == nullptr) {
             n = new AVLNode<T>(t);
+#ifndef NDEBUG
+            size++;
+#endif
             return true;
       }
 
