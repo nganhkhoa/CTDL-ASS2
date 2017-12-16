@@ -22,14 +22,38 @@ using namespace std;
 
 
 bool initVMGlobalData(void** pGData) {
-      // TODO: allocate and initialize global data
-      // return false if failed
+      auto vehicleTree = new AVLTree<string>();
+      auto rList       = (L1List<VM_Record>*) *pGData;
+
+      rList->traverse(
+         [](VM_Record& vmr, void* v) {
+               auto    tree = (AVLTree<string>*) v;
+               string  id(vmr.id);
+               string* ret = nullptr;
+               if (tree->find(id, ret))
+                     return;
+
+               tree->insert(id);
+         },
+         vehicleTree);
+
+      *pGData = vehicleTree;
+
+#ifndef NDEBUG
+      auto console = spdlog::get("console.log");
+      auto file    = spdlog::get("file.log");
+      console->info("{} vehicles", vehicleTree->getSize());
+      file->info("{} vehicles", vehicleTree->getSize());
+#endif
+
       return true;
 }
 
 void releaseVMGlobalData(void* pGData) {
-      // TODO: do your cleanup, left this empty if you don't have any
-      // dynamically allocated data
+      auto vehicleTree = (AVLTree<string>*) pGData;
+      delete vehicleTree;
+      vehicleTree = nullptr;
+      pGData      = nullptr;
 }
 
 bool processRequest(
