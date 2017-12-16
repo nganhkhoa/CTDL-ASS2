@@ -258,12 +258,25 @@ struct AVLNode
 template <class T>
 class AVLTree {
       AVLNode<T>* _pRoot;
+#ifndef NDEBUG
+      size_t size;
+#endif
 
     public:
-      AVLTree() : _pRoot(nullptr) {}
+      AVLTree() : _pRoot(nullptr) {
+#ifndef NDEBUG
+            size = 0;
+#endif
+      }
       ~AVLTree() {
             destroy(_pRoot);
       }
+
+#ifndef NDEBUG
+      inline size_t getSize() const {
+            return size;
+      }
+#endif
 
       bool find(T& key, T*& ret) {
             return find(_pRoot, key, ret);
@@ -293,7 +306,7 @@ class AVLTree {
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLRN(AVLNode<T>* pR, void (*op)(T&));
 
-#ifdef UNITTEST
+#if defined UNITTEST || !defined NDEBUG
     public:
       L1List<AVLNode<T>*>* getListNode() {
             auto list = new L1List<AVLNode<T>*>();
@@ -370,7 +383,7 @@ bool AVLTree<T>::balanceLeft(AVLNode<T>*& n) {
 
       switch (rlh - llh) {
             case 1:
-                  rotLR(n->_pRight);
+                  rotLR(n);
                   return true;
             case -1:
                   rotRight(n);
@@ -390,8 +403,7 @@ bool AVLTree<T>::balanceRight(AVLNode<T>*& n) {
 
       switch (rrh - lrh) {
             case -1:
-                  rotRL(n->_pRight);
-                  rotLeft(n);
+                  rotRL(n);
                   return true;
             case 1:
                   rotLeft(n);
@@ -423,6 +435,9 @@ template <class T>
 bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
       if (n == nullptr) {
             n = new AVLNode<T>(t);
+#ifndef NDEBUG
+            size++;
+#endif
             return true;
       }
 
@@ -464,6 +479,23 @@ void AVLTree<T>::traverseLRN(AVLNode<T>* pR, void (*op)(T&)) {
       traverseNLR(pR->_pLeft);
       traverseNLR(pR->_pRight);
       op(pR->_data);
+}
+
+
+template <class T>
+bool AVLTree<T>::find(AVLNode<T>* pR, T& key, T*& ret) {
+      if (!pR)
+            return false;
+
+      if (pR->_data == key) {
+            ret = &pR->_data;
+            return true;
+      }
+
+      if (pR->_data > key)
+            return find(pR->_pLeft, key, ret);
+      else
+            return find(pR->_pRight, key, ret);
 }
 
 #endif    // A02_DSALIB_H
