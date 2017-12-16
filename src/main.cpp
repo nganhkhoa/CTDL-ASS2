@@ -5,8 +5,6 @@
 
 #ifndef NDEBUG
 #include <spdlog/spdlog.h>
-#include <logger.h>
-logger* logger::_logger = nullptr;
 #endif
 
 #include <dsaLib.h>
@@ -23,24 +21,45 @@ void display(L1List<VM_Record>& bList) {
 
 int main(int narg, char** argv) {
 #ifndef NDEBUG
-      logger::init();
-      auto logger  = logger::get();
-      auto console = logger->console();
-      auto file    = logger->file();
+      // setup loggers
+      try {
+            // create two logger for console and file
+            auto console = spdlog::stdout_color_mt("console.log");
+
+            // get file name as run time
+            time_t      t = time(nullptr);
+            std::string file_name(asctime(std::localtime(&t)));
+            file_name = file_name.substr(0, 24);
+            file_name = "logs/" + file_name + ".log";
+            // create log file with name as run time
+            auto file = spdlog::basic_logger_mt("file.log", file_name);
+
+      } catch (const spdlog::spdlog_ex& ex) {
+            std::cout << "Some error occured " << ex.what() << "\n";
+            exit(255);
+      }
+
+      auto console = spdlog::get("console.log");
+      auto file    = spdlog::get("file.log");
+
+      console->set_pattern("[ %H:%M:%S.%F ]\n    >> %v");
+      file->set_pattern("[%H:%M:%S.%F]\n    >> %v");
+      console->info("Logging system initialized");
+      file->info("Logging system initialized");
 #endif    // DEBUG
 #ifndef UNITTEST
       L1List<VM_Request> requestList;
       L1List<VM_Record>  db;
 
 #ifndef NDEBUG
-      console->info("Load request");
-      file->info("Load request");
+      console->info("Load request from file: {}", argv[1]);
+      file->info("Load request from file: {}", argv[1]);
 #endif
       loadRequests(argv[1], requestList);
 
 #ifndef NDEBUG
-      console->info("Load data");
-      file->info("Load data");
+      console->info("Load data from file: {}", argv[2]);
+      file->info("Load data from file: {}", argv[2]);
 #endif
       loadVMDB(argv[2], db);
 
@@ -63,7 +82,6 @@ int main(int narg, char** argv) {
 #ifndef NDEBUG
       console->info("All operations done");
       file->info("All operations done");
-      delete logger;
 #endif
       return 0;
 #else    // UNITTEST

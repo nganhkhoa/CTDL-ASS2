@@ -14,7 +14,6 @@
 
 #ifndef NDEBUG
 #include <spdlog/spdlog.h>
-#include <logger.h>
 #endif
 
 void loadRequests(char* fName, L1List<VM_Request>& rList) {

@@ -14,7 +14,6 @@
 
 #ifndef NDEBUG
 #include <spdlog/spdlog.h>
-#include <logger.h>
 #endif
 
 using namespace std;
@@ -41,9 +40,8 @@ bool processRequest(
 // return false for invlaid events
 
 #ifndef NDEBUG
-      auto logger  = logger::get();
-      auto console = logger->console();
-      auto file    = logger->file();
+      auto console = spdlog::get("console.log");
+      auto file    = spdlog::get("file.log");
       console->info("processing request {}", request.code);
       file->info("processing request {}", request.code);
 #endif

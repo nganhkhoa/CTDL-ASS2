@@ -23,7 +23,6 @@
 
 #ifndef NDEBUG
 #include <spdlog/spdlog.h>
-#include <logger.h>
 #endif
 
 using namespace std;
