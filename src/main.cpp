@@ -82,6 +82,7 @@ int main(int narg, char** argv) {
 #ifndef NDEBUG
       console->info("All operations done");
       file->info("All operations done");
+      spdlog::drop_all();
 #endif
       return 0;
 #else    // UNITTEST
