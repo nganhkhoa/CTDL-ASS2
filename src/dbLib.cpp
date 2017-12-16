@@ -74,7 +74,7 @@ bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
       if (
          sscanf(
             temp,
-            "%d,%d/%d/%d %d:%d:%d,%10[a-zA-Z0-9],%lF,%lF,%*s",
+            "%d,%d/%d/%d %d:%d:%d,%16[a-zA-Z0-9],%lF,%lF,%*s",
             &rev,
             &thisTime.tm_mon,
             &thisTime.tm_mday,
@@ -91,8 +91,13 @@ bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
       thisTime.tm_mon -= 1;
       thisTime.tm_isdst = -1;
 
+#ifdef __linux
       bInfo.timestamp = timegm(&thisTime);
+#else
+      bInfo.timestamp = mktime(&thisTime);
+#endif
 
+      // pading zeros in
       size_t idlength = strlen(bInfo.id);
       if (idlength < 4) {
             memmove(bInfo.id + 4 - idlength, bInfo.id, 4);
@@ -105,7 +110,7 @@ bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
 }
 
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& rList) {
-      void* pGData = nullptr;
+      void* pGData = &rList;
       initVMGlobalData(&pGData);
 
       while (!requestList.isEmpty()) {
