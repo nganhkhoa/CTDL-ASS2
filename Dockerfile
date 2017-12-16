@@ -1,6 +1,6 @@
 FROM rikorose/gcc-cmake
 
-RUN   && mkdir build && cd build \
+RUN   mkdir build && cd build \
       && cmake .. -DCMAKE_BUILD_TYPE=Release \
       && make \
       && cd ../bin \
