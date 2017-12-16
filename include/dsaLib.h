@@ -351,7 +351,7 @@ void AVLTree<T>::rotRight(AVLNode<T>*& n) {
 
 template <class T>
 void AVLTree<T>::rotLR(AVLNode<T>*& n) {
-      rotLeft(n->_pLeft);
+      rotLeft(n->_pRight);
       rotRight(n);
 }
 
@@ -370,7 +370,7 @@ bool AVLTree<T>::balanceLeft(AVLNode<T>*& n) {
 
       switch (rlh - llh) {
             case 1:
-                  rotLR(n->_pRight);
+                  rotLR(n);
                   return true;
             case -1:
                   rotRight(n);
@@ -390,8 +390,7 @@ bool AVLTree<T>::balanceRight(AVLNode<T>*& n) {
 
       switch (rrh - lrh) {
             case -1:
-                  rotRL(n->_pRight);
-                  rotLeft(n);
+                  rotRL(n);
                   return true;
             case 1:
                   rotLeft(n);
