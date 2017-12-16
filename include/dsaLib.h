@@ -258,12 +258,21 @@ struct AVLNode
 template <class T>
 class AVLTree {
       AVLNode<T>* _pRoot;
+#ifndef NDEBUG
+      size_t size;
+#endif
 
     public:
       AVLTree() : _pRoot(nullptr) {}
       ~AVLTree() {
             destroy(_pRoot);
       }
+
+#ifndef NDEBUG
+      inline size_t getSize() const {
+            return size;
+      }
+#endif
 
       bool find(T& key, T*& ret) {
             return find(_pRoot, key, ret);
@@ -351,7 +360,7 @@ void AVLTree<T>::rotRight(AVLNode<T>*& n) {
 
 template <class T>
 void AVLTree<T>::rotLR(AVLNode<T>*& n) {
-      rotLeft(n->_pRight);
+      rotLeft(n->_pLeft);
       rotRight(n);
 }
 
@@ -463,6 +472,23 @@ void AVLTree<T>::traverseLRN(AVLNode<T>* pR, void (*op)(T&)) {
       traverseNLR(pR->_pLeft);
       traverseNLR(pR->_pRight);
       op(pR->_data);
+}
+
+
+template <class T>
+bool AVLTree<T>::find(AVLNode<T>* pR, T& key, T*& ret) {
+      if (!pR)
+            return false;
+
+      if (pR->_data == key) {
+            ret = &pR->_data;
+            return true;
+      }
+
+      if (pR->_data > key)
+            return find(pR->_pLeft, key, ret);
+      else
+            return find(pR->_pRight, key, ret);
 }
 
 #endif    // A02_DSALIB_H
