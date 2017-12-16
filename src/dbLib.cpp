@@ -43,16 +43,15 @@ void loadVMDB(char* fName, L1List<VM_Record>& db) {
             db.insertHead(record);    /// add dummy object
 
             while (getline(inFile, line)) {
-                  /// On Windows, lines on file ends with \r\n. So you have to
-                  /// remove \r
+                  /// On Windows, lines on file ends with \r\n
+                  /// So you have to remove \r
                   if (line[line.length() - 1] == '\r')
                         line.erase(line.length() - 1);
                   if (line.length() > 0) {
-                        if (parseVMRecord(
-                               (char*) line.data(),
-                               db[0]))    /// parse and store data directly
-                              db.insertHead(
-                                 record);    /// add dummy object for next turn
+                        /// parse and store data directly
+                        if (parseVMRecord((char*) line.data(), db[0]))
+                              /// add dummy object for next turn
+                              db.insertHead(record);
                   }
             }
             db.removeHead();    /// remove the first dummy
