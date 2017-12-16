@@ -17,6 +17,26 @@
 #endif
 
 void loadRequests(char* fName, L1List<VM_Request>& rList) {
-      // TODO: write your code to load requests. Each request is separated by a
-      // whitespace
+      ifstream inFile(fName);
+
+      if (!inFile) {
+            cout << "The file is not found!";
+            return;
+      }
+
+      string line;
+      bool   end;
+      while (getline(inFile, line, ' ')) {
+            if (line[line.length() - 1] == ';') {
+                  line.erase(line.length() - 1);
+                  end = true;
+            }
+
+            VM_Request req(line);
+            rList.insertHead(req);
+
+            if (end)
+                  break;
+      }
+      rList.reverse();
 }
