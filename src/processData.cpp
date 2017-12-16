@@ -44,6 +44,21 @@ bool initVMGlobalData(void** pGData) {
       auto file    = spdlog::get("file.log");
       console->info("{} vehicles", vehicleTree->getSize());
       file->info("{} vehicles", vehicleTree->getSize());
+
+      auto   list = vehicleTree->getListNode();
+      string str;
+      list->traverse(
+         [](AVLNode<string>*& n, void* v) {
+               static int i = 0;
+
+               auto str = (string*) v;
+               *str += " " + n->_data;
+
+               i++;
+         },
+         &str);
+
+      file->info("vehicles:\n{}", str);
 #endif
 
       return true;
