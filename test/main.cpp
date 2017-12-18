@@ -1,12 +1,21 @@
 #include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <algorithm>
 
 #ifndef NDEBUG
 #include <spdlog/spdlog.h>
 #endif
 
-#include <dsaLib.h>
-#include <requestLib.h>
-#include <dbLib.h>
+#include <gtest/gtest.h>
+
+// to be include here
+
+// use these tags to remind others
+// Tags: TODO:, BUGME:, NEW:, MORETEST:
 
 using namespace std;
 
@@ -37,13 +46,7 @@ void initLoggers() {
 
 #endif    // NDEBUG
 
-/// This function displays the content of database
-void display(L1List<VM_Record>& bList) {
-      cout.flush();
-      bList.traverse(printVMRecord);
-}
-
-int main(int narg, char** argv) {
+int main(int argc, char** argv, char** envp) {
 #ifdef _WIN32
       system("cls");
 #elif __unix
@@ -60,41 +63,7 @@ int main(int narg, char** argv) {
       file->info("Running tests");
 #endif    // NDEBUG
 
-      L1List<VM_Request> requestList;
-      L1List<VM_Record>  db;
-
-#ifndef NDEBUG
-      console->info("Load request from file: {}", argv[1]);
-      file->info("Load request from file: {}", argv[1]);
-#endif
-      loadRequests(argv[1], requestList);
-
-#ifndef NDEBUG
-      console->info("Load data from file: {}", argv[2]);
-      file->info("Load data from file: {}", argv[2]);
-#endif
-      loadVMDB(argv[2], db);
-
-      cout << fixed << setprecision(12);    // preset for floating point numbers
-
-#ifndef NDEBUG
-      console->info(
-         "Begin processing {} events with {} records",
-         requestList.getSize(),
-         db.getSize());
-      file->info(
-         "Begin processing {} events with {} records",
-         requestList.getSize(),
-         db.getSize());
-#endif
-      process(requestList, db);
-
-      cout << resetiosflags(ios::showbase) << setprecision(-1);
-
-#ifndef NDEBUG
-      console->info("All operations done");
-      file->info("All operations done");
-      spdlog::drop_all();
-#endif
-      return 0;
+      testing::InitGoogleTest(&argc, argv);
+      int ret = RUN_ALL_TESTS();
+      return ret;
 }
