@@ -306,7 +306,7 @@ class AVLTree {
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLRN(AVLNode<T>* pR, void (*op)(T&));
 
-#if defined UNITTEST || !defined NDEBUG
+#if defined UNIT_TEST || !defined NDEBUG
     public:
       L1List<AVLNode<T>*>* getListNode() {
             auto list = new L1List<AVLNode<T>*>();
@@ -317,8 +317,8 @@ class AVLTree {
       void _getListNode(AVLNode<T>* pR, L1List<AVLNode<T>*>* list) {
             if (!pR)
                   return;
-            list->insertHead(pR);
             _getListNode(pR->_pLeft, list);
+            list->insertHead(pR);
             _getListNode(pR->_pRight, list);
       }
 #endif

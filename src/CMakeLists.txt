@@ -1,40 +1,20 @@
-
-set (SOURCES 
-      "main.cpp"
+# add new libs/modules here
+add_library (DSA171A2
       "dbLib.cpp"
       "processData.cpp"
       "requestLib.cpp"
 )
 
-# add new libs here
-
 # add libs names here
-set (allLibs "")
+set (allLibs "DSA171A2")
 
-if (TEST)
+if (UNIT_TEST)
 
-add_executable (${PROJECT_NAME}-test ${SOURCES} $<TARGET_OBJECTS:TESTING>)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test ${CMAKE_CURRENT_BINARY_DIR}/test)
 
-link_directories(${google_test})
-include(${google_test}/cmake/internal_utils.cmake)
+else ()
 
-cxx_library(gtest "${cxx_strict}" ${google_test}/src/gtest-all.cc)
-cxx_library(gtest_main "${cxx_strict}" ${google_test}/src/gtest_main.cc)
-
-target_link_libraries(${PROJECT_NAME}-test gtest_main gtest)
-target_link_libraries(${PROJECT_NAME}-test ${allLibs})
-if(USEBOOST)
-    file(GLOB_RECURSE boostLib "${BOOST_LIBRARYDIR}/*.a")
-    target_link_libraries(${PROJECT_NAME}-test ${boostLib})
-endif()
-
-else (TEST)
-
-add_executable (${PROJECT_NAME} ${SOURCES})
+add_executable (${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} ${allLibs})
-if(USEBOOST)
-    file(GLOB_RECURSE boostLib "${BOOST_LIBRARYDIR}/*.a")
-    target_link_libraries(${PROJECT_NAME} ${boostLib})
-endif()
 
-endif (TEST)
+endif()

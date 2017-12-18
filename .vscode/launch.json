@@ -2,10 +2,10 @@
       "version": "0.2.0",
       "configurations": [
             {
-                  "name": "launch",
+                  "name": "dsa171a2",
                   "type": "cppdbg",
                   "request": "launch",
-                  "preLaunchTask": "build",
+                  "preLaunchTask": "build-program",
                   "args": [
                         "request.txt",
                         "data.csv"
@@ -26,12 +26,13 @@
                         ]
                   },
                   "osx": {
+                        "program": "${workspaceRoot}/bin/dsa171a2",
                         "MIMode": "lldb"
                   },
                   "windows": {
                         "program": "${workspaceRoot}/bin/dsa171a2.exe",
                         "MIMode": "gdb",
-                        "miDebuggerPath": "C:\\Program Files (x86)\\mingw-w64\\i686-7.1.0-posix-dwarf-rt_v5-rev0\\mingw32\\bin\\gdb.exe",
+                        "miDebuggerPath": "gdb",
                         "setupCommands": [
                               {
                                     "description": "Enable pretty-printing for gdb",
@@ -45,12 +46,12 @@
                   "name": "test",
                   "type": "cppdbg",
                   "request": "launch",
+                  "preLaunchTask": "build-test",
                   "args": [],
                   "stopAtEntry": false,
                   "cwd": "${workspaceRoot}/resource",
                   "environment": [],
                   "externalConsole": true,
-                  "preLaunchTask": "build",
                   "linux": {
                         "program": "${workspaceRoot}/bin/dsa171a2-test",
                         "MIMode": "gdb",
@@ -63,12 +64,13 @@
                         ]
                   },
                   "osx": {
+                        "program": "${workspaceRoot}/bin/dsa171a2-test",
                         "MIMode": "lldb"
                   },
                   "windows": {
                         "program": "${workspaceRoot}/bin/dsa171a2-test.exe",
                         "MIMode": "gdb",
-                        "miDebuggerPath": "C:\\Program Files (x86)\\mingw-w64\\i686-7.1.0-posix-dwarf-rt_v5-rev0\\mingw32\\bin\\gdb.exe",
+                        "miDebuggerPath": "gdb",
                         "setupCommands": [
                               {
                                     "description": "Enable pretty-printing for gdb",

@@ -1,19 +1,21 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0.0)
 
 
 set(OTHER_FILES_EXTENSION "")
 
 set (PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-      # thiet lap o day
+      # config here
       set(PROJECT_NAME "dsa171a2")
+      set(TEST_NAME "dsa171a2-test")
 
       set(SOURCE_FOLDER "src")
+      set(TEST_FOLDER "test")
       set(INCLUDE_FOLDER "include")
       set(OUTPUT_FOLDER "bin")
 
       # vs only settings
-      set(OTHER_FILES_FOLDER "bin")
+      set(OTHER_FILES_FOLDER "resource")
 
       set(DEBUG_FOLDER "bin") # vs only
 
@@ -24,43 +26,28 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../${OUTPUT_FOLDER})
 project (${PROJECT_NAME} CXX)
 
 
-if (USEBOOST)
-
-set(BOOST_INCLUDEDIR "C:/Program Files/boost/include/boost-1_65_1")
-set(BOOST_LIBRARYDIR "C:/Program Files/boost/lib")
-
-include_directories(${BOOST_INCLUDEDIR})
-endif() # use_boost
-
 # the included folder for <foo.h>
 include_directories(${INCLUDE_FOLDER})
 include_directories("${INCLUDE_FOLDER}/spdlog/include/")
-include_directories("${INCLUDE_FOLDER}/googletest/")
+include_directories("${INCLUDE_FOLDER}/googletest/googletest/include")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 # using Clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-
-
-
+# using g++
 set(WARNING "-Wall")
 set(PUBLIC "-static -static-libgcc -static-libstdc++")
+
 set(IDENTIFIER "-fextended-identifiers --input-charset=utf-8 -finput-charset=utf-8 --exec-charset=utf-8")
+
 set(CPPVERSION "-std=c++11")
-set(CXX_DEFINES "-DAVL_USE_HEIGHT -DUSE_CUSTOME_COMPARE_OPS -DUSE_HASH_ID")
-set(LINKER "-pthread")
+set(MULTITHREAD "-pthread")
 
-set(CMAKE_CXX_FLAGS ${WARNING}\ ${PUBLIC}\ ${IDENTIFIER}\ ${CPPVERSION}\ ${LINKER}\ ${CXX_DEFINES})
+set(CXX_DEFINES "-DAVL_USE_HEIGHT")
 
-      if(TEST)
-            add_definitions(-DUNITTEST)
-            set (google_test "${PROJECT_ROOT_DIR}/include/googletest/googletest")
-            include_directories(${google_test})
-            include_directories(${google_test}/include)
-            add_subdirectory("test")
-      else(TEST)
-            add_subdirectory("src")
-      endif(TEST)
+set(CMAKE_CXX_FLAGS ${WARNING}\ ${PUBLIC}\ ${IDENTIFIER}\ ${CPPVERSION}\ ${MULTITHREAD}\ ${CXX_DEFINES})
+
+add_subdirectory("src")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 # using Intel C++

@@ -1,6 +1,6 @@
 # list of folders not to be included in
-/spike
-/build
+/build-program
+/build-test
 /bin
 /src/version.h
 
