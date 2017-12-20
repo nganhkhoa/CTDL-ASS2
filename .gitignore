@@ -1,6 +1,7 @@
 # list of folders not to be included in
-/build
 /bin
+/build
+*/logs/*
 /src/version.h
 
 # list of files not to be included in

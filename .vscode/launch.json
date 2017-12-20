@@ -48,7 +48,7 @@
                   "request": "launch",
                   "preLaunchTask": "build-test",
                   "args": [
-                        "--gtest_output=\"xml:logs/report.log\""
+                        "--gtest_output=\"xml:logs/\""
                   ],
                   "stopAtEntry": false,
                   "cwd": "${workspaceRoot}/resource",
