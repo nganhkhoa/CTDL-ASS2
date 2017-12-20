@@ -47,7 +47,9 @@
                   "type": "cppdbg",
                   "request": "launch",
                   "preLaunchTask": "build-test",
-                  "args": [],
+                  "args": [
+                        "--gtest_output=\"xml:logs/report.log\""
+                  ],
                   "stopAtEntry": false,
                   "cwd": "${workspaceRoot}/resource",
                   "environment": [],
