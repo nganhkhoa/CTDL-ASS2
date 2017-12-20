@@ -10,7 +10,7 @@ Các thiết bị này ghi nhận vị trí GPS tại các thời điểm lấy 
 liên tục. Vì số lượng thông tin gởi về server khá nhiều nên để giảm thiểu tải cho server,
 người ta quyết định lưu dữ liệu tạm thời trên cấu trúc cây để thao tác nhanh chóng và
 lưu dữ liệu đó xuống database vào cuối ngày. Dữ liệu trong ngày cũng tương đối lớn,
-do đó cây được chọn pahải có cấu trúc cân bằng nhằm đảm bảo truy xuất nhanh.
+do đó cây được chọn phải có cấu trúc cân bằng nhằm đảm bảo truy xuất nhanh.
 Do đó trong trường hợp này AVL được chọn làm cấu trúc dữ liệu lưu trữ.
 
 ## 2. Yêu cầu
