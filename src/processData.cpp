@@ -49,12 +49,8 @@ bool initVMGlobalData(void** pGData) {
       string str;
       list->traverse(
          [](AVLNode<string>*& n, void* v) {
-               static int i = 0;
-
                auto str = (string*) v;
                *str += " " + n->_data;
-
-               i++;
          },
          &str);
 

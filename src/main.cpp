@@ -19,9 +19,12 @@ void initLoggers() {
             auto console = spdlog::stdout_color_mt("console.log");
 
             // get file name as run time
-            time_t      t = time(nullptr);
-            std::string file_name(asctime(std::localtime(&t)));
-            file_name = file_name.substr(0, 24);
+            time_t     t  = time(nullptr);
+            struct tm* lt = std::localtime(&t);
+            string     file_name =
+               to_string(lt->tm_year + 1900) + "-" + to_string(lt->tm_mon + 1) +
+               "-" + to_string(lt->tm_mday) + " " + to_string(lt->tm_hour) +
+               ":" + to_string(lt->tm_min) + ":" + to_string(lt->tm_sec);
             file_name = "logs/" + file_name + ".log";
             // create log file with name as run time
             auto file = spdlog::basic_logger_mt("file.log", file_name);
@@ -55,9 +58,7 @@ int main(int narg, char** argv) {
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
       console->info("Logging system initialized");
-      console->info("Running tests");
       file->info("Logging system initialized");
-      file->info("Running tests");
 #endif    // NDEBUG
 
       L1List<VM_Request> requestList;
