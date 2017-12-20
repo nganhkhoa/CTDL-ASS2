@@ -1,172 +1,174 @@
 {
-	// See https://go.microsoft.com/fwlink/?LinkId=733558
-	// for the documentation about the tasks.json format
-	"version": "2.0.0",
-	"type": "shell",
-	"presentation": {
-		"echo": true,
-		"reveal": "always",
-		"focus": false,
-		"panel": "shared"
-	},
-	"echoCommand": false,
-	"tasks": [
-		{
-			"label": "build-program",
-			"options": {
-				"cwd": "${workspaceRoot}/build-program"
-			},
-			"windows": {
-				"command": "mingw32-make"
-			},
-			"linux": {
-				"command": "make"
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": {
-				"owner": "cpp",
-				"fileLocation": "absolute",
-				"pattern": {
-					"regexp": "(.*.cpp):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)",
-					"file": 1,
-					"line": 2,
-					"column": 3,
-					"severity": 4,
-					"message": 5,
-					"loop": true
-				}
-			}
-		},
-		{
-			"label": "build-test",
-			"options": {
-				"cwd": "${workspaceRoot}/build-test"
-			},
-			"windows": {
-				"command": "mingw32-make"
-			},
-			"linux": {
-				"command": "make"
-			},
-			"group": {
-				"kind": "test",
-				"isDefault": true
-			},
-			"problemMatcher": {
-				"owner": "cpp",
-				"fileLocation": "absolute",
-				"pattern": {
-					"regexp": "(.*.cpp):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)",
-					"file": 1,
-					"line": 2,
-					"column": 3,
-					"severity": 4,
-					"message": 5,
-					"loop": true
-				}
-			}
-		},
-		{
-			"label": "clean-build",
-			"options": {
-				"cwd": "${workspaceRoot}/build-test"
-			},
-			"windows": {
-				"command": "mingw32-make"
-			},
-			"linux": {
-				"command": "make"
-			},
-			"args": [
-				"clean"
-			]
-		},
-		{
-			"label": "clean-test",
-			"options": {
-				"cwd": "${workspaceRoot}/build-test"
-			},
-			"windows": {
-				"command": "mingw32-make"
-			},
-			"linux": {
-				"command": "make"
-			},
-			"args": [
-				"clean"
-			]
-		},
-		{
-			"label": "CMake-Test",
-			"command": "cmake",
-			"options": {
-				"cwd": "${workspaceRoot}/build-test"
-			},
-			"windows": {
-				"args": [
-					"..",
-					"-G",
-					"\"MinGW Makefiles\"",
-					"-DCMAKE_BUILD_TYPE=Debug",
-					"-DUNIT_TEST=ON",
-				]
-			},
-			"linux": {
-				"args": [
-					"..",
-					"-DCMAKE_BUILD_TYPE=Debug",
-					"-DUNIT_TEST=ON",
-				]
-			}
-		},
-		{
-			"label": "CMake-Debug",
-			"command": "cmake",
-			"options": {
-				"cwd": "${workspaceRoot}/build-program"
-			},
-			"windows": {
-				"args": [
-					"..",
-					"-G",
-					"\"MinGW Makefiles\"",
-					"-DCMAKE_BUILD_TYPE=Debug",
-					"-DUNIT_TEST=OFF",
-				]
-			},
-			"linux": {
-				"args": [
-					"..",
-					"-DCMAKE_BUILD_TYPE=Debug",
-					"-DUNIT_TEST=OFF",
-				]
-			}
-		},
-		{
-			"label": "CMake-Release",
-			"command": "cmake",
-			"options": {
-				"cwd": "${workspaceRoot}/build-program"
-			},
-			"windows": {
-				"args": [
-					"..",
-					"-G",
-					"\"MinGW Makefiles\"",
-					"-DCMAKE_BUILD_TYPE=Release",
-					"-DUNIT_TEST=OFF",
-				]
-			},
-			"linux": {
-				"args": [
-					"..",
-					"-DCMAKE_BUILD_TYPE=Release",
-					"-DUNIT_TEST=OFF",
-				]
-			}
-		}
-	]
+      // See https://go.microsoft.com/fwlink/?LinkId=733558
+      // for the documentation about the tasks.json format
+      "version": "2.0.0",
+      "type": "shell",
+      "options": {
+            "cwd": "${workspaceRoot}/build"
+      },
+      "presentation": {
+            "echo": true,
+            "reveal": "always",
+            "focus": false,
+            "panel": "shared"
+      },
+      "echoCommand": false,
+      "tasks": [
+            {
+                  "label": "build-program",
+                  "windows": {
+                        "command": "mingw32-make",
+                        "args": [
+                              "dsa171a2"
+                        ]
+                  },
+                  "linux": {
+                        "command": "make",
+                        "args": [
+                              "dsa171a2"
+                        ]
+                  },
+                  "group": {
+                        "kind": "build",
+                        "isDefault": true
+                  },
+                  "problemMatcher": {
+                        "owner": "cpp",
+                        "fileLocation": "absolute",
+                        "pattern": {
+                              "regexp": "(.*.cpp):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)",
+                              "file": 1,
+                              "line": 2,
+                              "column": 3,
+                              "severity": 4,
+                              "message": 5,
+                              "loop": true
+                        }
+                  }
+            },
+            {
+                  "label": "build-test",
+                  "windows": {
+                        "command": "mingw32-make",
+                        "args": [
+                              "dsa171a2-test"
+                        ]
+                  },
+                  "linux": {
+                        "command": "make",
+                        "args": [
+                              "dsa171a2-test"
+                        ]
+                  },
+                  "group": {
+                        "kind": "test",
+                        "isDefault": true
+                  },
+                  "problemMatcher": {
+                        "owner": "cpp",
+                        "fileLocation": "absolute",
+                        "pattern": {
+                              "regexp": "(.*.cpp):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)",
+                              "file": 1,
+                              "line": 2,
+                              "column": 3,
+                              "severity": 4,
+                              "message": 5,
+                              "loop": true
+                        }
+                  }
+            },
+            {
+                  "label": "clean",
+                  "windows": {
+                        "command": "mingw32-make"
+                  },
+                  "linux": {
+                        "command": "make"
+                  },
+                  "args": [
+                        "clean"
+                  ]
+            },
+            {
+                  "label": "CMake-Test",
+                  "command": "cmake",
+                  "windows": {
+                        "args": [
+                              "..",
+                              "-G",
+                              "\"MinGW Makefiles\"",
+                              "-DCMAKE_BUILD_TYPE=Debug",
+                              "-DUNIT_TEST=ON",
+                        ]
+                  },
+                  "linux": {
+                        "args": [
+                              "..",
+                              "-DCMAKE_BUILD_TYPE=Debug",
+                              "-DUNIT_TEST=ON",
+                        ]
+                  }
+            },
+            {
+                  "label": "CMake-Test-Release",
+                  "command": "cmake",
+                  "windows": {
+                        "args": [
+                              "..",
+                              "-G",
+                              "\"MinGW Makefiles\"",
+                              "-DCMAKE_BUILD_TYPE=Release",
+                              "-DUNIT_TEST=ON",
+                        ]
+                  },
+                  "linux": {
+                        "args": [
+                              "..",
+                              "-DCMAKE_BUILD_TYPE=Release",
+                              "-DUNIT_TEST=ON",
+                        ]
+                  }
+            },
+            {
+                  "label": "CMake-Debug",
+                  "command": "cmake",
+                  "windows": {
+                        "args": [
+                              "..",
+                              "-G",
+                              "\"MinGW Makefiles\"",
+                              "-DCMAKE_BUILD_TYPE=Debug",
+                              "-DUNIT_TEST=OFF",
+                        ]
+                  },
+                  "linux": {
+                        "args": [
+                              "..",
+                              "-DCMAKE_BUILD_TYPE=Debug",
+                              "-DUNIT_TEST=OFF",
+                        ]
+                  }
+            },
+            {
+                  "label": "CMake-Release",
+                  "command": "cmake",
+                  "windows": {
+                        "args": [
+                              "..",
+                              "-G",
+                              "\"MinGW Makefiles\"",
+                              "-DCMAKE_BUILD_TYPE=Release",
+                              "-DUNIT_TEST=OFF",
+                        ]
+                  },
+                  "linux": {
+                        "args": [
+                              "..",
+                              "-DCMAKE_BUILD_TYPE=Release",
+                              "-DUNIT_TEST=OFF",
+                        ]
+                  }
+            }
+      ]
 }

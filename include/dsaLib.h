@@ -335,7 +335,20 @@ class AVLTree {
 
 template <class T>
 void AVLTree<T>::destroy(AVLNode<T>*& n) {
-      // remove node
+      if (n == nullptr)
+            return;
+
+      if (n->_pLeft == nullptr && n->_pRight == nullptr) {
+            delete n;
+            n = nullptr;
+      }
+      else {
+            // destroy left right and itself
+            destroy(n->_pLeft);
+            destroy(n->_pRight);
+            delete n;
+            n = nullptr;
+      }
 }
 
 template <class T>
