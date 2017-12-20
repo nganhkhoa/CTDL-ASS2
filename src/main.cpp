@@ -58,9 +58,7 @@ int main(int narg, char** argv) {
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
       console->info("Logging system initialized");
-      console->info("Running tests");
       file->info("Logging system initialized");
-      file->info("Running tests");
 #endif    // NDEBUG
 
       L1List<VM_Request> requestList;
