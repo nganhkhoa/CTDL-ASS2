@@ -9,14 +9,14 @@ TEST(AVL, assending) {
       {
             int data;
             int height;
-      } sample[10] = {{3, 4},
+      } sample[10] = {{0, 1},
                       {1, 2},
-                      {0, 1},
                       {2, 1},
-                      {7, 3},
-                      {5, 2},
+                      {3, 4},
                       {4, 1},
+                      {5, 2},
                       {6, 1},
+                      {7, 3},
                       {8, 2},
                       {9, 1}};
 
@@ -38,21 +38,21 @@ TEST(AVL, assending) {
 
 TEST(AVL, dessending) {
       AVLTree<int> avl;
-      for (int i = 10; i < 0; i--)
+      for (int i = 10; i > 0; i--)
             avl.insert(i);
       struct node
       {
             int data;
             int height;
-      } sample[10] = {{7, 4},
-                      {3, 3},
+      } sample[10] = {{1, 1},
                       {2, 2},
-                      {1, 1},
-                      {5, 2},
+                      {3, 3},
                       {4, 1},
+                      {5, 2},
                       {6, 1},
-                      {9, 2},
+                      {7, 4},
                       {8, 1},
+                      {9, 2},
                       {10, 1}};
 
       auto list = avl.getListNode();
@@ -81,21 +81,21 @@ TEST(AVL, random1) {
       {
             int data;
             int height;
-      } sample[15] = {{62, 5},
-                      {29, 4},
-                      {26, 3},
+      } sample[15] = {{4, 1},
                       {5, 2},
-                      {4, 1},
                       {7, 1},
+                      {26, 3},
                       {27, 1},
-                      {43, 2},
+                      {29, 4},
                       {32, 1},
+                      {43, 2},
                       {46, 1},
-                      {73, 3},
+                      {62, 5},
                       {67, 2},
                       {70, 1},
-                      {79, 2},
-                      {74, 1}};
+                      {73, 3},
+                      {74, 1},
+                      {79, 2}};
 
       auto list = avl.getListNode();
       list->traverse(
