@@ -12,9 +12,8 @@ if (UNIT_TEST)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test ${CMAKE_CURRENT_BINARY_DIR}/test)
 
-else ()
+endif()
 
+project(${PROJECT_NAME})
 add_executable (${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} ${allLibs})
-
-endif()

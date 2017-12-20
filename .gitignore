@@ -1,6 +1,5 @@
 # list of folders not to be included in
-/build-program
-/build-test
+/build
 /bin
 /src/version.h
 
