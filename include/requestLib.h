@@ -63,6 +63,53 @@ typedef struct VM_Request
       }
 } VM_Request;
 
+
+struct returnType
+{
+      enum class type : int
+      {
+            empty,
+            list,
+            boolean,
+            floatingpoint,
+            number
+      };
+      union {                    // 4 bytes
+            L1List<void*>* l;    // 4 bytes
+            bool           b;    // 2 bytes
+            double         d;    // 4 bytes
+            int            i;    // 4 bytes
+      };
+      type t;
+
+      // ok, this struct has 2 members
+      // type t, and an unnamed union
+
+      returnType() {
+            t = type::empty;
+      }
+
+      returnType(L1List<void*>* l) {
+            t       = type::list;
+            this->l = l;
+      }
+
+      returnType(bool b) {
+            t       = type::boolean;
+            this->b = b;
+      }
+
+      returnType(double d) {
+            t       = type::floatingpoint;
+            this->d = d;
+      }
+
+      returnType(int i) {
+            t       = type::number;
+            this->i = i;
+      }
+};
+
 void loadRequests(char* fName, L1List<VM_Request>&);
 
 #endif    // DSA171A2_REQUESTLIB_H
