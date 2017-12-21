@@ -3,7 +3,7 @@ FROM rikorose/gcc-cmake
 COPY . /dsa171a2/
 
 RUN   ls /dsa171a2/ && cd /dsa171a2/ \
-      && make-compress.sh false \
+      && ./make-compress.sh false \
       && cd out \
       && g++ main.cpp -o main.o \
       && g++ dbLib.cpp -o dbLib.o \
