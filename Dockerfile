@@ -2,16 +2,21 @@ FROM rikorose/gcc-cmake
 
 COPY . /dsa171a2/
 
-RUN   apt-get install zip \
-      && ls /dsa171a2/ && cd /dsa171a2/ \
+# get zip to make it work with script
+RUN   apt-get -qq update && apt-get -qq -y install zip \
+      && cd /dsa171a2/ \
+      # run auto script
       && ./make-compress.sh false \
-      && ls /dsa171a2/ && ls /dsa171a2/out \
       && cd out \
-      && g++ main.cpp -o main.o \
-      && g++ dbLib.cpp -o dbLib.o \
-      && g++ requestLib.cpp -o requestLib.o \
-      && g++ processData.cpp -o processData.o \
-      && g++ main.o dbLib.o requestLib.o processData.o -o /dsa171a2/bin/dsa171a2 \
+      # get all files needed to build
+      && curl "https://raw.githubusercontent.com/saitamandd/DSA171-A02/master/main.cpp" > main.cpp \
+      && g++ main.cpp -c -std=c++11 \
+      && g++ dbLib.cpp -c -std=c++11 \
+      && g++ requestLib.cpp -c -std=c++11 \
+      && g++ processData.cpp -c -std=c++11 \
+      # link the built files
+      && g++ main.o dbLib.o requestLib.o processData.o -std=c++11 -o /dsa171a2/bin/dsa171a2 \
+      # remove the folders so no one can see it
       && rm -rf src/ include/ test/ out/
 
 ENTRYPOINT ["/dsa171a2/bin/dsa171a2", "dsa171a2/resource/request.txt", "dsa171a2/resource/data.csv"]
