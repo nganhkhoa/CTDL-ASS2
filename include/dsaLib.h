@@ -258,13 +258,13 @@ struct AVLNode
 template <class T>
 class AVLTree {
       AVLNode<T>* _pRoot;
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       size_t size;
 #endif
 
     public:
       AVLTree() : _pRoot(nullptr) {
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
             size = 0;
 #endif
       }
@@ -272,7 +272,7 @@ class AVLTree {
             destroy(_pRoot);
       }
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       inline size_t getSize() const {
             return size;
       }
@@ -448,7 +448,7 @@ template <class T>
 bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
       if (n == nullptr) {
             n = new AVLNode<T>(t);
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
             size++;
 #endif
             return true;

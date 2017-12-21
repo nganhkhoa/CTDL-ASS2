@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
 #include <spdlog/spdlog.h>
 #endif
 
@@ -19,7 +19,7 @@
 
 using namespace std;
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
 
 void initLoggers() {
       // setup loggers
@@ -56,7 +56,7 @@ int main(int argc, char** argv, char** envp) {
       system("clear");
 #endif
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       initLoggers();
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");

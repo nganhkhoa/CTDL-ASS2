@@ -1,6 +1,6 @@
 #include <iostream>
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
 #include <spdlog/spdlog.h>
 #endif
 
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
 
 void initLoggers() {
       // setup loggers
@@ -53,7 +53,7 @@ int main(int narg, char** argv) {
       system("clear");
 #endif
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       initLoggers();
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
@@ -64,13 +64,13 @@ int main(int narg, char** argv) {
       L1List<VM_Request> requestList;
       L1List<VM_Record>  db;
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       console->info("Load request from file: {}", argv[1]);
       file->info("Load request from file: {}", argv[1]);
 #endif
       loadRequests(argv[1], requestList);
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       console->info("Load data from file: {}", argv[2]);
       file->info("Load data from file: {}", argv[2]);
 #endif
@@ -78,7 +78,7 @@ int main(int narg, char** argv) {
 
       cout << fixed << setprecision(12);    // preset for floating point numbers
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       console->info(
          "Begin processing {} events with {} records",
          requestList.getSize(),
@@ -92,7 +92,7 @@ int main(int narg, char** argv) {
 
       cout << resetiosflags(ios::showbase) << setprecision(-1);
 
-#ifndef NDEBUG
+#if !defined NDEBUG && defined CMAKED
       console->info("All operations done");
       file->info("All operations done");
       spdlog::drop_all();

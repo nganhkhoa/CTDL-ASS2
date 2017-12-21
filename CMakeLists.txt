@@ -5,6 +5,8 @@ set(OTHER_FILES_EXTENSION "")
 
 set (PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+      add_definitions(-DCMAKED)
+
       # config here
       set(PROJECT_NAME "dsa171a2")
       set(TEST_NAME "dsa171a2-test")
