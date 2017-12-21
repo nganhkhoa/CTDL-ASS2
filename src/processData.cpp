@@ -98,22 +98,31 @@ bool processRequest(
       switch (request.code[0] - '0') {
             case 1:
                   request1();
+                  break;
             case 2:
                   request2();
+                  break;
             case 3:
                   request3();
+                  break;
             case 4:
                   request4();
+                  break;
             case 5:
                   request5();
+                  break;
             case 6:
                   request6();
+                  break;
             case 7:
                   request7();
+                  break;
             case 8:
                   request8();
+                  break;
             case 9:
                   request9();
+                  break;
             default:
                   break;
       }
