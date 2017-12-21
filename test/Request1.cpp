@@ -2,7 +2,7 @@
 #include <functions.h>
 
 
-class req1 : public ::testing::Test {
+class req1_parsing : public ::testing::Test {
     protected:
       virtual void SetUp() {}
 
@@ -21,6 +21,8 @@ class req1 : public ::testing::Test {
                                              "1_1_1_1111",
                                              "1_1_1_11111"};
 
+      std::string right_req_str{"1_1_1_111111"};
+
       VM_Request wrong_req[9]{
          wrong_req_str[0],
          wrong_req_str[1],
@@ -33,13 +35,20 @@ class req1 : public ::testing::Test {
          wrong_req_str[8]
          // one more is complete
       };
+
+      VM_Request right_req{right_req_str};
 };
 
 
-TEST_F(req1, wrong_code) {
+TEST_F(req1_parsing, wrong_code) {
       for (int i = 0; i < 10; ++i) {
             auto ret = request1(wrong_req[0], List);
             ASSERT_EQ(returnType::type::boolean, ret.t);
             EXPECT_FALSE(ret.b);
       }
+}
+
+TEST_F(req1_parsing, right_code) {
+      auto ret = request1(right_req, List);
+      ASSERT_EQ(returnType::type::list, ret.t);
 }
