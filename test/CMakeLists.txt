@@ -2,8 +2,13 @@ set (AVL_TEST
       "AVL.cpp"
 )
 
+set (Request_Test
+      "Request1.cpp"
+)
+
 set (ALL_TEST
       ${AVL_TEST}
+      ${Request_Test}
 )
 
 # build googletest from source
