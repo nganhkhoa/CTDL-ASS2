@@ -68,17 +68,6 @@ void releaseVMGlobalData(void* pGData) {
 }
 
 
-void request1();
-void request2();
-void request3();
-void request4();
-void request5();
-void request6();
-void request7();
-void request8();
-void request9();
-
-
 bool processRequest(
    VM_Request&        request,
    L1List<VM_Record>& recordList,
@@ -97,7 +86,7 @@ bool processRequest(
 
       switch (request.code[0] - '0') {
             case 1:
-                  request1();
+                  request1(request, recordList);
                   break;
             case 2:
                   request2();
@@ -131,12 +120,49 @@ bool processRequest(
 }
 
 
-void request1() {}
-void request2() {}
-void request3() {}
-void request4() {}
-void request5() {}
-void request6() {}
-void request7() {}
-void request8() {}
-void request9() {}
+returnType request1(VM_Request& request, L1List<VM_Record>& list) {
+
+      struct tm thisTime;
+      char      car_1[ID_MAX_LENGTH];
+      char      car_2[ID_MAX_LENGTH];
+      if (
+         sscanf(    // 1_X_Y_hhmmss
+            request.code,
+            "%1lf_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
+            &request.params[0],
+            car_1,
+            car_2,
+            &thisTime.tm_hour,
+            &thisTime.tm_min,
+            &thisTime.tm_sec) != 6)
+            return {false};
+
+      auto ret = new L1List<void*>();
+
+
+      return {ret};
+}
+returnType request2() {
+      return {false};
+}
+returnType request3() {
+      return {false};
+}
+returnType request4() {
+      return {false};
+}
+returnType request5() {
+      return {false};
+}
+returnType request6() {
+      return {false};
+}
+returnType request7() {
+      return {false};
+}
+returnType request8() {
+      return {false};
+}
+returnType request9() {
+      return {false};
+}
