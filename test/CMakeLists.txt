@@ -16,6 +16,6 @@ cxx_library(gtest_main "${cxx_strict}" ${google_test}/src/gtest_main.cc)
 
 
 project(${TEST_NAME})
-add_executable (${TEST_NAME} main.cpp ${ALL_TEST})
+add_executable (${TEST_NAME} main-test.cpp ${ALL_TEST})
 target_link_libraries(${TEST_NAME} gtest_main gtest)
 target_link_libraries(${TEST_NAME} ${allLibs})
