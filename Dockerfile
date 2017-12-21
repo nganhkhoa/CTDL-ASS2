@@ -2,8 +2,10 @@ FROM rikorose/gcc-cmake
 
 COPY . /dsa171a2/
 
-RUN   ls /dsa171a2/ && cd /dsa171a2/ \
+RUN   apt-get install zip \
+      && ls /dsa171a2/ && cd /dsa171a2/ \
       && ./make-compress.sh false \
+      && ls /dsa171a2/ && ls /dsa171a2/out \
       && cd out \
       && g++ main.cpp -o main.o \
       && g++ dbLib.cpp -o dbLib.o \
