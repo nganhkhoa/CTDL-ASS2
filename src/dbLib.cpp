@@ -161,3 +161,11 @@ double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d) {
       return 2.0 * earthRadiusKm *
              asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
+
+
+double VM_Record::DistanceTo(double lat, double lon) {
+      return distanceEarth(lat, lon, latitude, longitude);
+}
+double VM_Record::DistanceTo(const VM_Record& r) {
+      return distanceEarth(r.latitude, r.longitude, latitude, longitude);
+}

@@ -48,6 +48,41 @@ struct VM_Record
             latitude(bus.latitude) {
             strcpy(id, bus.id);
       }
+
+      char RelativeLatitudeTo(double lat) {
+            if (latitude - lat >= 0)
+                  return 'N';
+            else
+                  return 'S';
+      }
+      char RelativeLongitudeTo(double lon) {
+            if (longitude - lon >= 0)
+                  return 'E';
+            else
+                  return 'W';
+      }
+      char RelativeLatitudeTo(const VM_Record& r) {
+            return RelativeLatitudeTo(r.latitude);
+      }
+      char RelativeLongitudeTo(const VM_Record& r) {
+            return RelativeLongitudeTo(r.longitude);
+      }
+      char RelativeLatitudeTo(double lat, double lon) {
+            return RelativeLatitudeTo(lat);
+      }
+      char RelativeLongitudeTo(double lat, double lon) {
+            return RelativeLongitudeTo(lon);
+      }
+
+      double DistanceTo(double lat, double lon);
+      double DistanceTo(const VM_Record& r);
+
+      bool isInRange(double lat, double lon, double radius) {
+            return DistanceTo(lat, lon) <= radius;
+      }
+      bool isInRange(const VM_Record& r, double radius) {
+            return DistanceTo(r) <= radius;
+      }
 };
 
 void   printVMRecord(VM_Record&);
@@ -56,10 +91,8 @@ bool   parseVMRecord(char*, VM_Record&);
 void   loadVMDB(char*, L1List<VM_Record>&);
 double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d);
 
-bool processRequest(
-   VM_Request&,
-   L1List<VM_Record>&,
-   void*);    // from processData.cpp
+// from processData.cpp
+bool processRequest(VM_Request&, L1List<VM_Record>&, void*);
 
 /// NOTE: student may create this function to allocate some global data
 bool initVMGlobalData(void** pGData);

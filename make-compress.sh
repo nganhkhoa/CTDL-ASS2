@@ -52,7 +52,7 @@ fi
 
 # else
 echo 'deleting temp folder'
-echo 'use "./make-compress.sh -t false" to keep temp folder'
+echo 'use "./make-compress.sh false" to keep temp folder'
 rm -rf out
 echo 'Job completed'
 exit 0
