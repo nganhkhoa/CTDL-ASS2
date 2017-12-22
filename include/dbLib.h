@@ -37,13 +37,16 @@ struct VM_Record
 
       // default constructor
       VM_Record() {
-            id[0] = 0;
+            id[0]     = 0;
+            timestamp = 0;
+            longitude = 0;
+            latitude  = 0;
       }
       VM_Record(const char* busID) {
             strcpy(id, busID);
       }
       // copy constructor
-      VM_Record(VM_Record& bus)
+      VM_Record(const VM_Record& bus)
           : timestamp(bus.timestamp), longitude(bus.longitude),
             latitude(bus.latitude) {
             strcpy(id, bus.id);
@@ -103,5 +106,16 @@ bool initVMGlobalData(void** pGData);
 void releaseVMGlobalData(void* pGData);
 
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
+
+
+returnType request1(VM_Request&, L1List<VM_Record>&);
+returnType request2();
+returnType request3();
+returnType request4();
+returnType request5();
+returnType request6();
+returnType request7();
+returnType request8();
+returnType request9();
 
 #endif    // DSA171A2_DBLIB_H

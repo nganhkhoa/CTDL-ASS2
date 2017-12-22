@@ -68,16 +68,7 @@ void releaseVMGlobalData(void* pGData) {
 }
 
 
-void request1();
-void request2();
-void request3();
-void request4();
-void request5();
-void request6();
-void request7();
-void request8();
-void request9();
-
+bool print(returnType&, VM_Request&);
 
 bool processRequest(
    VM_Request&        request,
@@ -95,48 +86,178 @@ bool processRequest(
 
       auto vehicleTree = (AVLTree<string>*) pGData;
 
+      returnType r;
+
       switch (request.code[0] - '0') {
             case 1:
-                  request1();
+                  r = request1(request, recordList);
                   break;
             case 2:
-                  request2();
+                  r = request2();
                   break;
             case 3:
-                  request3();
+                  r = request3();
                   break;
             case 4:
-                  request4();
+                  r = request4();
                   break;
             case 5:
-                  request5();
+                  r = request5();
                   break;
             case 6:
-                  request6();
+                  r = request6();
                   break;
             case 7:
-                  request7();
+                  r = request7();
                   break;
             case 8:
-                  request8();
+                  r = request8();
                   break;
             case 9:
-                  request9();
+                  r = request9();
                   break;
             default:
                   break;
       }
 
-      return true;
+      return print(r, request);
 }
 
 
-void request1() {}
-void request2() {}
-void request3() {}
-void request4() {}
-void request5() {}
-void request6() {}
-void request7() {}
-void request8() {}
-void request9() {}
+returnType request1(VM_Request& request, L1List<VM_Record>& list) {
+
+      if (list.isEmpty())
+            return {false};
+
+      auto thisTime = localtime(&list.at(0).timestamp);
+      if (thisTime == nullptr)
+            return {"cannot get time from data"};
+
+      VM_Record car_1, car_2;
+      if (
+         sscanf(    // 1_X_Y_hhmmss
+            request.code,
+            "%1lf_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
+            &request.params[0],
+            car_1.id,
+            car_2.id,
+            &thisTime->tm_hour,
+            &thisTime->tm_min,
+            &thisTime->tm_sec) != 6)
+            return {false};
+
+      car_1.timestamp = timegm(thisTime);
+      car_2.timestamp = timegm(thisTime);
+
+      vector<VM_Record> record;
+      record.push_back(car_1);
+      record.push_back(car_2);
+
+      try {
+            list.traverse(
+               [](VM_Record& r, void* v) {
+                     auto record = (vector<VM_Record>*) v;
+
+                     auto& record_1 = record->at(0);
+                     if (
+                        strcmp(r.id, record_1.id) == 0 &&
+                        r.timestamp == record_1.timestamp) {
+                           record_1 = r;
+                     }
+
+                     auto& record_2 = record->at(1);
+                     if (
+                        strcmp(r.id, record_2.id) == 0 &&
+                        r.timestamp == record_2.timestamp) {
+                           record_2 = r;
+                     }
+               },
+               &record);
+      } catch (std::exception& e) {
+      }
+
+      if (
+         record.at(0).longitude == 0 || record.at(0).latitude == 0 ||
+         record.at(1).longitude == 0 || record.at(1).latitude == 0)
+            return {false};
+
+      auto ret = new L1List<string>();
+
+      char RelativeLat = record.at(0).RelativeLatitudeTo(record.at(1));
+      char RelativeLon = record.at(0).RelativeLongitudeTo(record.at(1));
+
+      stringstream ss;
+      ss << fixed << setprecision(12) << record.at(0).DistanceTo(record.at(1));
+
+      string distance = ss.str();
+      string lat      = to_string(RelativeLat);
+      string lon      = to_string(RelativeLon);
+
+      ret->push_back(lon);
+      ret->push_back(lat);
+      ret->push_back(distance);
+
+      return {ret};
+}
+returnType request2() {
+      return {false};
+}
+returnType request3() {
+      return {false};
+}
+returnType request4() {
+      return {false};
+}
+returnType request5() {
+      return {false};
+}
+returnType request6() {
+      return {false};
+}
+returnType request7() {
+      return {false};
+}
+returnType request8() {
+      return {false};
+}
+returnType request9() {
+      return {false};
+}
+
+
+bool print(returnType& r, VM_Request& req) {
+      switch (r.t) {
+            case returnType::type::empty:
+                  return false;
+            case returnType::type::boolean:
+                  cout << req.code << ": -1\n";
+                  return false;
+
+            case returnType::type::list:
+                  cout << req.code << ":";
+                  if (r.l->isEmpty())
+                        cout << " -1";
+                  else
+                        r.l->traverse([](string& s) { cout << " " << s; });
+                  cout << "\n";
+                  delete r.l;
+                  r.l = nullptr;
+                  return true;
+
+            case returnType::type::tree:
+                  return true;
+
+            case returnType::type::floatingpoint:
+                  cout << req.code << ": " << fixed << setprecision(12) << r.d
+                       << "\n";
+                  return true;
+
+            case returnType::type::number:
+                  cout << req.code << ": " << r.i << "\n";
+                  return true;
+
+            default:
+                  // we should not get here
+                  return false;
+      };
+}

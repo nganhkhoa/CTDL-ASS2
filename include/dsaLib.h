@@ -472,25 +472,25 @@ void AVLTree<T>::traverseNLR(AVLNode<T>* pR, void (*op)(T&)) {
             return;
 
       op(pR->_data);
-      traverseNLR(pR->_pLeft);
-      traverseNLR(pR->_pRight);
+      traverseNLR(pR->_pLeft, op);
+      traverseNLR(pR->_pRight, op);
 }
 template <class T>
 void AVLTree<T>::traverseLNR(AVLNode<T>* pR, void (*op)(T&)) {
       if (!pR)
             return;
 
-      traverseNLR(pR->_pLeft);
+      traverseNLR(pR->_pLeft, op);
       op(pR->_data);
-      traverseNLR(pR->_pRight);
+      traverseNLR(pR->_pRight, op);
 }
 template <class T>
 void AVLTree<T>::traverseLRN(AVLNode<T>* pR, void (*op)(T&)) {
       if (!pR)
             return;
 
-      traverseNLR(pR->_pLeft);
-      traverseNLR(pR->_pRight);
+      traverseNLR(pR->_pLeft, op);
+      traverseNLR(pR->_pRight, op);
       op(pR->_data);
 }
 
