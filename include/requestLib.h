@@ -66,19 +66,41 @@ typedef struct VM_Request
 
 struct returnType
 {
+      /**
+       * Return with type empty or boolean
+       *    => failed or request wrong
+       *    => which all comes to wrong request being read
+       *    => print -1
+       *
+       * Return with type double
+       *    => print with setprecision(12)
+       *
+       * Return with type number
+       *    => print number
+       *
+       * Return with type list
+       *    => print the item
+       *
+       * Return with type tree
+       *    => print by traversing LNR
+       */
       enum class type : int
       {
             empty,
+            error,
             list,
+            tree,
             boolean,
             floatingpoint,
             number
       };
-      union {                    // 4 bytes
-            L1List<void*>* l;    // 4 bytes
-            bool           b;    // 2 bytes
-            double         d;    // 4 bytes
-            int            i;    // 4 bytes
+      union {                        // 4 bytes
+            L1List<string>*  l;      // 4 bytes
+            AVLTree<string>* tr;     // 4 bytes
+            bool             b;      // 2 bytes
+            double           d;      // 4 bytes
+            int              i;      // 4 bytes
+            char*            err;    // 4 bytes
       };
       type t;
 
@@ -89,9 +111,14 @@ struct returnType
             t = type::empty;
       }
 
-      returnType(L1List<void*>* l) {
+      returnType(L1List<string>* l) {
             t       = type::list;
             this->l = l;
+      }
+
+      returnType(AVLTree<string>* tr) {
+            t        = type::tree;
+            this->tr = tr;
       }
 
       returnType(bool b) {
@@ -107,6 +134,11 @@ struct returnType
       returnType(int i) {
             t       = type::number;
             this->i = i;
+      }
+
+      returnType(const char* err) {
+            t = type::error;
+            strcpy(this->err, err);
       }
 };
 
