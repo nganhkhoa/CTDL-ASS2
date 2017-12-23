@@ -8,6 +8,22 @@
  * Algorithms - Fall 2017
  * =========================================================================================
  */
+/**
+ * This is done by nguyen anh khoa - 1611617
+ *
+ * Github repository will be public after online judge closes
+ * Github: https://github.com/nganhkhoa/CTDL-ASS2.git
+ * Docker:
+ * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
+ *
+ * Library use with define so no affect on building online
+ *
+ * Libraries used:
+ *    Spdlog: https://github.com/gabime/spdlog
+ *    Googletest: https://github.com/google/googletest
+ *
+ * This is only in case teacher want to interview me
+ */
 
 #ifndef A02_DSALIB_H
 #define A02_DSALIB_H
@@ -258,13 +274,13 @@ struct AVLNode
 template <class T>
 class AVLTree {
       AVLNode<T>* _pRoot;
-#if !defined NDEBUG && defined CMAKED
+#if defined UNIT_TEST || defined DEBUGGING
       size_t size;
 #endif
 
     public:
       AVLTree() : _pRoot(nullptr) {
-#if !defined NDEBUG && defined CMAKED
+#if defined UNIT_TEST || defined DEBUGGING
             size = 0;
 #endif
       }
@@ -272,7 +288,7 @@ class AVLTree {
             destroy(_pRoot);
       }
 
-#if !defined NDEBUG && defined CMAKED
+#if defined UNIT_TEST || defined DEBUGGING
       inline size_t getSize() const {
             return size;
       }
@@ -306,7 +322,7 @@ class AVLTree {
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLRN(AVLNode<T>* pR, void (*op)(T&));
 
-#if defined UNIT_TEST || !defined NDEBUG
+#if defined UNIT_TEST || defined DEBUGGING
     public:
       L1List<AVLNode<T>*>* getListNode() {
             auto list = new L1List<AVLNode<T>*>();
@@ -448,7 +464,7 @@ template <class T>
 bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
       if (n == nullptr) {
             n = new AVLNode<T>(t);
-#if !defined NDEBUG && defined CMAKED
+#if defined UNIT_TEST || defined DEBUGGING
             size++;
 #endif
             return true;

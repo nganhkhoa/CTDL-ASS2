@@ -5,6 +5,23 @@
  * - Fall 2017
  * ==========================================================================================
  */
+/**
+ * This is done by nguyen anh khoa - 1611617
+ *
+ * Github repository will be public after online judge closes
+ * Github: https://github.com/nganhkhoa/CTDL-ASS2.git
+ * Docker:
+ * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
+ *
+ * Library use with define so no affect on building online
+ *
+ * Libraries used:
+ *    Spdlog: https://github.com/gabime/spdlog
+ *    Googletest: https://github.com/google/googletest
+ *
+ * This is only in case teacher want to interview me
+ */
+
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -12,7 +29,7 @@
 #include <requestLib.h>
 #include <dbLib.h>
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
 #include <spdlog/spdlog.h>
 #endif
 
@@ -39,7 +56,7 @@ bool initVMGlobalData(void** pGData) {
 
       *pGData = vehicleTree;
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
       console->info("{} vehicles", vehicleTree->getSize());
@@ -77,7 +94,7 @@ bool processRequest(
 // TODO: Your code goes here
 // return false for invlaid events
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
       console->info("processing request {}", request.code);
