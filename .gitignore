@@ -14,7 +14,7 @@
 
 # files auto fix of vscode
 .vscode/.cmaketools.json
-
+.vscode/last.sql
 
 # exception
 !cppcheck.log
