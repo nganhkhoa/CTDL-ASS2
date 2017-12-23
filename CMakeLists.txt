@@ -50,7 +50,14 @@ set(MULTITHREAD "-pthread")
 
 set(CXX_DEFINES "-DAVL_USE_HEIGHT")
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}\ ${WARNING}\ ${PUBLIC}\ ${IDENTIFIER}\ ${CPPVERSION}\ ${MULTITHREAD}\ ${CXX_DEFINES})
+set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} \
+      ${WARNING} \
+      ${IDENTIFIER} \
+      ${CPPVERSION} \
+      ${MULTITHREAD} \
+      ${CXX_DEFINES}"
+)
 
 
 add_subdirectory("src")

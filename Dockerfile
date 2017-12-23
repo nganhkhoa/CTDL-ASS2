@@ -31,7 +31,7 @@ RUN   apt-get -qq update \
       # if build is ok then build and run tests
       #
       && mkdir -p /dsa171a2/build/ cd /dsa171a2/build/ \
-      && cmake .. -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=ON > /dev/null \
+      && cmake .. -DCMAKE_BUILD_TYPE=Release -DUNIT_TEST=ON > /dev/null \
       && make dsa171a2-test \
       && cd /dsa171a2/bin \
       # run tests
