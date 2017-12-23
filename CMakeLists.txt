@@ -5,7 +5,10 @@ set(OTHER_FILES_EXTENSION "")
 
 set (PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-      add_definitions(-DCMAKED)
+      if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+            message("Add define DEBUGGING")
+            add_definitions(-DDEBUGGING)
+      endif()
 
       # config here
       set(PROJECT_NAME "dsa171a2")

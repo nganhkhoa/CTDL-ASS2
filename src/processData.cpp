@@ -12,7 +12,7 @@
 #include <requestLib.h>
 #include <dbLib.h>
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
 #include <spdlog/spdlog.h>
 #endif
 
@@ -39,7 +39,7 @@ bool initVMGlobalData(void** pGData) {
 
       *pGData = vehicleTree;
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
       console->info("{} vehicles", vehicleTree->getSize());
@@ -77,7 +77,7 @@ bool processRequest(
 // TODO: Your code goes here
 // return false for invlaid events
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
       console->info("processing request {}", request.code);

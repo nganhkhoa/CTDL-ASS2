@@ -12,7 +12,7 @@
 
 #include <requestLib.h>
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
 #include <spdlog/spdlog.h>
 #endif
 

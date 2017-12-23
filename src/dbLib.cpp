@@ -21,7 +21,7 @@
 #define __PI 3.14159265358979323846
 #define earthRadiusKm 6371.0
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
 #include <spdlog/spdlog.h>
 #endif
 
