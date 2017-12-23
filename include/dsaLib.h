@@ -8,6 +8,22 @@
  * Algorithms - Fall 2017
  * =========================================================================================
  */
+/**
+ * This is done by nguyen anh khoa - 1611617
+ *
+ * Github repository will be public after online judge closes
+ * Github: https://github.com/nganhkhoa/CTDL-ASS2.git
+ * Docker:
+ * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
+ *
+ * Library use with define so no affect on building online
+ *
+ * Libraries used:
+ *    Spdlog: https://github.com/gabime/spdlog
+ *    Googletest: https://github.com/google/googletest
+ *
+ * This is only in case teacher want to interview me
+ */
 
 #ifndef A02_DSALIB_H
 #define A02_DSALIB_H
