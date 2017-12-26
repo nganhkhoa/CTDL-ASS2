@@ -39,35 +39,31 @@ using namespace std;
 
 
 bool initVMGlobalData(void** pGData) {
-      auto vehicleTree = new AVLTree<string>();
-      auto rList       = (L1List<VM_Record>*) *pGData;
+      auto vehicles = new L1List<string>();
+      auto rList    = (L1List<VM_Record>*) *pGData;
 
       rList->traverse(
          [](VM_Record& vmr, void* v) {
-               auto    tree = (AVLTree<string>*) v;
-               string  id(vmr.id);
-               string* ret = nullptr;
-               if (tree->find(id, ret))
-                     return;
-
-               tree->insert(id);
+               auto   vehicles = (L1List<string>*) v;
+               string id(vmr.id);
+               if (vehicles->find(id) != nullptr)
+                     vehicles->insertHead(id);
          },
-         vehicleTree);
+         vehicles);
 
-      *pGData = vehicleTree;
+      *pGData = vehicles;
 
 #ifdef DEBUGGING
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
-      console->info("{} vehicles", vehicleTree->getSize());
-      file->info("{} vehicles", vehicleTree->getSize());
+      console->info("{} vehicles", vehicles->getSize());
+      file->info("{} vehicles", vehicles->getSize());
 
-      auto   list = vehicleTree->getListNode();
       string str;
-      list->traverse(
-         [](AVLNode<string>*& n, void* v) {
+      vehicles->traverse(
+         [](string& s, void* v) {
                auto str = (string*) v;
-               *str += " " + n->_data;
+               *str += " " + s;
          },
          &str);
 
@@ -101,7 +97,7 @@ bool processRequest(
       file->info("processing request {}", request.code);
 #endif
 
-      auto vehicleTree = (AVLTree<string>*) pGData;
+      auto vehicles = (L1List<string>*) pGData;
 
       returnType r;
 
@@ -110,10 +106,10 @@ bool processRequest(
                   r = request1(request, recordList);
                   break;
             case 2:
-                  r = request2();
+                  r = request2(request, recordList, *vehicles);
                   break;
             case 3:
-                  r = request3();
+                  r = request3(request, recordList, *vehicles);
                   break;
             case 4:
                   r = request4();
@@ -216,11 +212,87 @@ returnType request1(VM_Request& request, L1List<VM_Record>& list) {
 
       return {ret};
 }
-returnType request2() {
-      return {false};
+returnType request2(
+   VM_Request&        req,
+   L1List<VM_Record>& list,
+   L1List<string>&    vehicles) {
+      if (list.isEmpty())
+            return {false};
+
+      char direction;
+      if (
+         sscanf(
+            req.code,
+            "%1lf_%10lf_%1[EW]",
+            &req.params[0],
+            &req.params[1],
+            &direction) != 3)
+            return {false};
+
+      struct Ans
+      {
+            L1List<string> out;
+            double         longitude;
+            char           direction;
+      };
+
+      Ans ans;
+      ans.longitude = req.params[1];
+      ans.direction = direction;
+      list.traverse(
+         [](VM_Record& vmr, void* v) {
+               Ans* ans = (Ans*) v;
+               if (vmr.RelativeLongitudeTo(ans->longitude) != ans->direction)
+                     return;
+               string id(vmr.id);
+               if (ans->out.find(id) == nullptr)
+                     ans->out.insertHead(id);
+         },
+         &ans);
+
+      int cars = vehicles.getSize() - ans.out.getSize();
+      return {cars};
 }
-returnType request3() {
-      return {false};
+returnType request3(
+   VM_Request&        req,
+   L1List<VM_Record>& list,
+   L1List<string>&    vehicles) {
+      if (list.isEmpty())
+            return {false};
+
+      char direction;
+      if (
+         sscanf(
+            req.code,
+            "%1lf_%10lf_%1[NS]",
+            &req.params[0],
+            &req.params[1],
+            &direction) != 3)
+            return {false};
+
+      struct Ans
+      {
+            L1List<string> out;
+            double         latitude;
+            char           direction;
+      };
+
+      Ans ans;
+      ans.latitude  = req.params[1];
+      ans.direction = direction;
+      list.traverse(
+         [](VM_Record& vmr, void* v) {
+               Ans* ans = (Ans*) v;
+               if (vmr.RelativeLatitudeTo(ans->latitude) != ans->direction)
+                     return;
+               string id(vmr.id);
+               if (ans->out.find(id) == nullptr)
+                     ans->out.insertHead(id);
+         },
+         &ans);
+
+      int cars = vehicles.getSize() - ans.out.getSize();
+      return {cars};
 }
 returnType request4() {
       return {false};

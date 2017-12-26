@@ -125,8 +125,8 @@ void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
 
 
 returnType request1(VM_Request&, L1List<VM_Record>&);
-returnType request2();
-returnType request3();
+returnType request2(VM_Request&, L1List<VM_Record>&, L1List<string>&);
+returnType request3(VM_Request&, L1List<VM_Record>&, L1List<string>&);
 returnType request4();
 returnType request5();
 returnType request6();
