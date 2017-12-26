@@ -228,6 +228,21 @@ bool L1List<T>::find(T& a, int& idx) {
 }
 
 template <class T>
+T* L1List<T>::find(T& a) {
+      if (isEmpty())
+            return nullptr;
+
+      auto temp = _pHead;
+      while (temp) {
+            if (temp->data == a) {
+                  return &temp->data;
+            }
+            temp = temp->pNext;
+      }
+      return nullptr;
+}
+
+template <class T>
 void L1List<T>::reverse() {
       if (isEmpty())
             return;
@@ -294,11 +309,18 @@ class AVLTree {
       }
 #endif
 
+      inline bool isEmpty() const {
+            return _pRoot == nullptr;
+      }
       bool find(T& key, T*& ret) {
             return find(_pRoot, key, ret);
       }
-      bool insert(T& key) {
-            return insert(_pRoot, key);
+      // a compare function
+      // making sure of not insert same data
+      bool insert(T& key, bool (*cmp)(T&, T&) = [](T& t1, T& t2) -> bool {
+            return false;
+      }) {
+            return insert(_pRoot, key, cmp);
       }
       bool remove(T& key) {
             return remove(_pRoot, key);
@@ -316,7 +338,7 @@ class AVLTree {
     protected:
       void destroy(AVLNode<T>*& pR);
       bool find(AVLNode<T>* pR, T& key, T*& ret);
-      bool insert(AVLNode<T>*& pR, T& a);
+      bool insert(AVLNode<T>*& pR, T& a, bool (*cmp)(T&, T&));
       bool remove(AVLNode<T>*& pR, T& a);
       void traverseNLR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
@@ -461,7 +483,7 @@ bool AVLTree<T>::balance(AVLNode<T>*& n) {
 }
 
 template <class T>
-bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
+bool AVLTree<T>::insert(AVLNode<T>*& n, T& t, bool (*cmp)(T&, T&)) {
       if (n == nullptr) {
             n = new AVLNode<T>(t);
 #if defined UNIT_TEST || defined DEBUGGING
@@ -470,11 +492,15 @@ bool AVLTree<T>::insert(AVLNode<T>*& n, T& t) {
             return true;
       }
 
+      // if same then stop
+      if (cmp(n->_data, t))
+            return false;
+
       if (t < n->_data) {
-            insert(n->_pLeft, t);
+            insert(n->_pLeft, t, cmp);
       }
       else {
-            insert(n->_pRight, t);
+            insert(n->_pRight, t, cmp);
       }
 
       n->calibrate();
