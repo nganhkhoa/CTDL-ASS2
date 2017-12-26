@@ -41,7 +41,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#define REQUEST_CODE_SIZE 16
+#define REQUEST_CODE_SIZE 50
 #define MAX_PARAM_SIZE 6
 using namespace std;
 
@@ -54,7 +54,7 @@ typedef struct VM_Request
             *code   = '0';    // default event is "0"
             code[1] = 0;
       }
-      VM_Request(char* str) {
+      VM_Request(const char* str) {
             strncpy(code, str, REQUEST_CODE_SIZE - 1);
       }
       VM_Request(string& str) {
