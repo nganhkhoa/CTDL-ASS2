@@ -4,6 +4,8 @@ set (AVL_TEST
 
 set (Request_Test
       "Request1.cpp"
+      "Request2.cpp"
+      "Request3.cpp"
 )
 
 set (ALL_TEST
