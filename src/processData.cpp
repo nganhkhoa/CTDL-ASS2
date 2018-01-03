@@ -231,9 +231,9 @@ returnType request2(
 
       struct Ans
       {
-            L1List<string> out;
-            double         longitude;
-            char           direction;
+            AVLTree<string> out;
+            double          longitude;
+            char            direction;
       };
 
       Ans ans;
@@ -245,13 +245,13 @@ returnType request2(
                if (vmr.RelativeLongitudeTo(ans->longitude) != ans->direction)
                      return;
                string id(vmr.id);
-               if (ans->out.find(id) == nullptr)
-                     ans->out.insertHead(id);
+
+               ans->out.insert(
+                  id, [](string& s1, string& s2) { return s1 == s2; });
          },
          &ans);
 
-      int cars = vehicles.getSize() - ans.out.getSize();
-      return {cars};
+      return {(int) (vehicles.getSize() - ans.out.getSize())};
 }
 returnType request3(
    VM_Request&        req,
@@ -272,9 +272,9 @@ returnType request3(
 
       struct Ans
       {
-            L1List<string> out;
-            double         latitude;
-            char           direction;
+            AVLTree<string> out;
+            double          latitude;
+            char            direction;
       };
 
       Ans ans;
@@ -285,14 +285,14 @@ returnType request3(
                Ans* ans = (Ans*) v;
                if (vmr.RelativeLatitudeTo(ans->latitude) != ans->direction)
                      return;
+
                string id(vmr.id);
-               if (ans->out.find(id) == nullptr)
-                     ans->out.insertHead(id);
+               ans->out.insert(
+                  id, [](string& s1, string& s2) { return s1 == s2; });
          },
          &ans);
 
-      int cars = vehicles.getSize() - ans.out.getSize();
-      return {cars};
+      return {(int) (vehicles.getSize() - ans.out.getSize())};
 }
 returnType request4(
    VM_Request&        req,
