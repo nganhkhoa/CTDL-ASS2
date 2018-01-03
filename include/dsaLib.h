@@ -289,25 +289,19 @@ struct AVLNode
 template <class T>
 class AVLTree {
       AVLNode<T>* _pRoot;
-#if defined UNIT_TEST || defined DEBUGGING
-      size_t size;
-#endif
+      size_t      size;
 
     public:
       AVLTree() : _pRoot(nullptr) {
-#if defined UNIT_TEST || defined DEBUGGING
             size = 0;
-#endif
       }
       ~AVLTree() {
             destroy(_pRoot);
       }
 
-#if defined UNIT_TEST || defined DEBUGGING
       inline size_t getSize() const {
             return size;
       }
-#endif
 
       inline bool isEmpty() const {
             return _pRoot == nullptr;
@@ -486,9 +480,7 @@ template <class T>
 bool AVLTree<T>::insert(AVLNode<T>*& n, T& t, bool (*cmp)(T&, T&)) {
       if (n == nullptr) {
             n = new AVLNode<T>(t);
-#if defined UNIT_TEST || defined DEBUGGING
             size++;
-#endif
             return true;
       }
 
