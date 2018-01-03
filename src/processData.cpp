@@ -112,7 +112,7 @@ bool processRequest(
                   r = request3(request, recordList, *vehicles);
                   break;
             case 4:
-                  r = request4();
+                  r = request4(request, recordList, *vehicles);
                   break;
             case 5:
                   r = request5();
@@ -294,8 +294,69 @@ returnType request3(
       int cars = vehicles.getSize() - ans.out.getSize();
       return {cars};
 }
-returnType request4() {
-      return {false};
+returnType request4(
+   VM_Request&        req,
+   L1List<VM_Record>& list,
+   L1List<string>&    vehicles) {
+      if (list.isEmpty())
+            return {(int) 0};
+
+      if (
+         sscanf(
+            req.code,
+            "%1lf_%10lf_%10lf_%10lf_%10lf_%10lf",
+            &req.params[0],    // 1 number
+            &req.params[1],    // atmost 10 Along with sign
+            &req.params[2],    // atmost 10 Alat with sign
+            &req.params[3],    // R
+            &req.params[4],    // H1
+            &req.params[5])    // H2
+         != 6)
+            return {false};
+
+      auto& start = req.params[4];
+      auto& end   = req.params[5];
+
+      // time constrain
+      if (start >= end)
+            return {false};
+
+      struct Ans
+      {
+            VM_Request      req;
+            AVLTree<string> list;
+
+            Ans(VM_Request r) : req(r) {}
+      };
+      Ans ans(req);
+
+      list.traverse(
+         [](VM_Record& r, void* v) {
+               auto ans  = (Ans*) v;
+               auto hour = localtime(&r.timestamp)->tm_hour;
+
+               // variables for easy reading
+               auto& lon    = ans->req.params[1];
+               auto& lat    = ans->req.params[2];
+               auto& radius = ans->req.params[3];
+               auto& start  = ans->req.params[4];
+               auto& end    = ans->req.params[5];
+
+               if (start > hour || end < hour)
+                     return;
+
+               auto distance = r.DistanceTo(lat, lon);
+
+               if (distance > radius)
+                     return;
+
+               string id = r.id;
+               ans->list.insert(
+                  id, [](string& s1, string& s2) { return s1 == s2; });
+         },
+         &ans);
+
+      return {(int) ans.list.getSize()};
 }
 returnType request5() {
       return {false};
