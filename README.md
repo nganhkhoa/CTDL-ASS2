@@ -156,7 +156,7 @@ Các yêu cầu truy xuất có mã và mô tả về việc truy xuất lần l
 	Mã yêu cầu: `7_Along_Alat_M_R_hhmm` <br/>
 	Trong đó `(Along, Alat)` là tọa độ của trạm quan sát A,
 	số lượng phương tiện trong trạm là **M**, bán kính quan sát là **R**,
-	hhmm là thời điểm phương tiện từ trạm A đi ra, được tính chính xác đến phút.<br/>
+	hhmm là thời điểm phương tiện từ trạm A đi ra, được tính chính xác đến phút.<br/>
 	Nếu số lượng phương tiện xuất hiện trong bán kính 500m tính từ trạm trong
 	khoảng thời gian từ **hhmm** đến sau đó 30 phút nhỏ hơn 0.7M thì không
 	xảy ra ùn tắc, ngược lại thì sẽ xảy ra ùm tắc. Trong trường hợp xảy ra ùm tắc,
