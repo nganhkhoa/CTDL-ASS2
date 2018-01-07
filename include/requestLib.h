@@ -95,10 +95,11 @@ struct returnType
        *    => print number
        *
        * Return with type list
-       *    => print the item
+       *    => print the items
        *
        * Return with type tree
        *    => print by traversing LNR
+       *    => sorted data printing
        */
       enum class type : int
       {
@@ -122,6 +123,8 @@ struct returnType
 
       // ok, this struct has 2 members
       // type t, and an unnamed union
+      // shallow copy is find though
+      // no need to define copy cons
 
       returnType() {
             t = type::empty;
