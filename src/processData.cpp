@@ -151,12 +151,13 @@ returnType request1(VM_Request& request, L1List<VM_Record>& list) {
          sscanf(    // 1_X_Y_hhmmss
             request.code,
             "%1lf_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
-            &request.params[0],
-            car_1.id,
-            car_2.id,
-            &thisTime->tm_hour,
-            &thisTime->tm_min,
-            &thisTime->tm_sec) != 6)
+            &request.params[0],    // request id
+            car_1.id,              // id of vehicle number 1
+            car_2.id,              // id of vehicle number 2
+            &thisTime->tm_hour,    // hour
+            &thisTime->tm_min,     // minute
+            &thisTime->tm_sec)     // second
+         != 6)
             return {false};
 
       car_1.timestamp = timegm(thisTime);
@@ -231,7 +232,7 @@ returnType request2(
       if (
          sscanf(
             req.code,
-            "%1lf_%10lf_%1[EW]",
+            "%1lf_%lf_%1[EW]",
             &req.params[0],
             &req.params[1],
             &direction) != 3)
@@ -286,10 +287,11 @@ returnType request3(
       if (
          sscanf(
             req.code,
-            "%1lf_%10lf_%1[NS]",
-            &req.params[0],
-            &req.params[1],
-            &direction) != 3)
+            "%1lf_%lf_%1[NS]",
+            &req.params[0],    // request id
+            &req.params[1],    // a coordinate
+            &direction)        // direction
+         != 3)
             return {false};
 
       struct Ans
@@ -337,7 +339,7 @@ returnType request4(
       if (
          sscanf(
             req.code,
-            "%1lf_%10lf_%10lf_%10lf_%10lf_%10lf",
+            "%1lf_%lf_%lf_%lf_%lf_%lf",
             &req.params[0],    // 1 number
             &req.params[1],    // atmost 10 Along with sign
             &req.params[2],    // atmost 10 Alat with sign
@@ -421,12 +423,13 @@ returnType request5(VM_Request& req, L1List<VM_Record>& list) {
       if (
          sscanf(
             req.code,
-            "%1d_%16[A-Za-z0-9]_%10lf_%10lf_%10lf",
-            &req_id,
-            ans.id,
-            &ans.lon,
-            &ans.lat,
-            &ans.radius) != 5)
+            "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
+            &req_id,        // request id
+            ans.id,         // answer id
+            &ans.lon,       // longitude of station
+            &ans.lat,       // latitude of station
+            &ans.radius)    // radius of station
+         != 5)
             return {false};
 
       list.traverse(
