@@ -17,7 +17,7 @@
  * Docker:
  * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
  *
- * Library use with define so no affect on building online
+ * Libraries are used with define so no affect on building online
  *
  * Libraries used:
  *    Spdlog: https://github.com/gabime/spdlog
