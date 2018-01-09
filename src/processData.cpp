@@ -46,7 +46,7 @@ bool initVMGlobalData(void** pGData) {
          [](VM_Record& vmr, void* v) {
                auto   vehicles = (L1List<string>*) v;
                string id(vmr.id);
-               if (vehicles->find(id) != nullptr)
+               if (vehicles->find(id) == nullptr)
                      vehicles->insertHead(id);
          },
          vehicles);
@@ -445,8 +445,63 @@ returnType request5(VM_Request& req, L1List<VM_Record>& list) {
 
       return {ans.occurence};
 }
-returnType request6() {
-      return {false};
+returnType request6(VM_Request& req, L1List<VM_Record>& list) {
+      if (list.isEmpty())
+            return {};
+
+      struct param
+      {
+            double lon;
+            double lat;
+            int    car_in;
+            int    hour;
+            int    minute;
+
+            struct pair
+            {
+                  string id;
+                  double distance;
+
+                  bool operator<(const pair& p) {}
+            };
+            // a tree of id and distance relative to lon and lat
+            AVLTree<pair> distance_tree;
+      } param;
+
+      if (
+         sscanf(
+            req.code,
+            "%1d_%lf_%lf_%d_%2d%2d",
+            &req_id,
+            &param.lon,
+            &param.lat,
+            &param.car_in,
+            &param.hour,
+            &param.minute) != 6)
+            return {false};
+
+      list.traverse(
+         [](VM_Record& r, void* v) {
+               auto param = (param*) v;
+               auto t     = gmtime(&r.timestamp);
+               t->hour    = param->hour;
+               t->min     = param->hour;
+
+               if (abs(difftime(t, timestamp)) >= 15 * 60)
+                     return;
+
+               auto distance = r.DistanceTo(param->lat, param->lon);
+
+               if (distance > 2)
+                     return;
+
+               param::pair p;
+               p.id       = r.id;
+               p.distance = distance;
+
+               param->distance_tree.insert(p);
+         },
+         &param)
 }
 returnType request7() {
       return {false};
