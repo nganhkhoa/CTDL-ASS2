@@ -23,7 +23,7 @@ class req2_parsing : public ::testing::Test {
 TEST_F(req2_parsing, wrong_code) {
       for (auto& req : wrong_req) {
             auto ret = request2(req, List, 0);
-            ASSERT_EQ(returnType::type::boolean, ret.t);
+            ASSERT_EQ(ReturnType::type::boolean, ret.t);
             EXPECT_FALSE(ret.b);
       }
 }

@@ -80,7 +80,7 @@ typedef struct VM_Request
 } VM_Request;
 
 
-struct returnType
+struct ReturnType
 {
       /**
        * Return with type empty or boolean
@@ -113,7 +113,7 @@ struct returnType
             string
       };
       union {                          // 4 bytes
-            L1List<returnType>* l;     // 4 bytes
+            L1List<ReturnType>* l;     // 4 bytes
             AVLTree<string>*    tr;    // 4 bytes
             bool                b;     // 2 bytes
             double              d;     // 4 bytes
@@ -124,16 +124,53 @@ struct returnType
       type t;
       int  code;    // error code
 
-      // ok, this struct has 2 members
-      // type t, and an unnamed union
-      // shallow copy is find though
-      // no need to define copy cons
-
-      returnType() {
+      ReturnType() {
             t = type::empty;
       }
 
-      returnType& operator=(const returnType& r) {
+      ReturnType(const ReturnType& r) {
+            switch (r.t) {
+                  case type::empty:
+                        break;
+
+                  case type::error:
+                        strcpy(err, r.err);
+                        code = r.code;
+                        break;
+
+                  case type::list:
+                        l = new L1List<ReturnType>();
+                        for (auto& x : *r.l)
+                              l->insertHead(x);
+                        l->reverse();
+                        break;
+
+                  case type::tree:
+                        tr = new AVLTree<string>();
+                        for (auto& x : *r.tr)
+                              tr->insert(x);
+                        break;
+
+                  case type::boolean:
+                        b = r.b;
+                        break;
+
+                  case type::floatingpoint:
+                        d = r.d;
+                        break;
+
+                  case type::number:
+                        i = r.i;
+                        break;
+
+                  case type::string:
+                        s = new string(*r.s);
+                        break;
+            }
+            t = r.t;
+      }
+
+      ReturnType& operator=(const ReturnType& r) {
             switch (r.t) {
                   case type::empty:
                         break;
@@ -167,61 +204,61 @@ struct returnType
                         s = r.s;
                         break;
             }
-
+            t = r.t;
             return *this;
       }
 
-      returnType(L1List<returnType>* l) {
+      ReturnType(L1List<ReturnType>* l) {
             t       = type::list;
             this->l = l;
       }
 
-      returnType(AVLTree<string>* tr) {
+      ReturnType(AVLTree<string>* tr) {
             t        = type::tree;
             this->tr = tr;
       }
 
-      returnType(bool b) {
+      ReturnType(bool b) {
             t       = type::boolean;
             this->b = b;
       }
 
-      returnType(double d) {
+      ReturnType(double d) {
             t       = type::floatingpoint;
             this->d = d;
       }
 
-      returnType(int i) {
+      ReturnType(int i) {
             t       = type::number;
             this->i = i;
       }
 
-      returnType(std::string& s) {
+      ReturnType(std::string& s) {
             t       = type::string;
             this->s = new string(s);
       }
 
-      returnType(int code, const char* err) {
+      ReturnType(int code, const char* err) {
             t = type::error;
             strcpy(this->err, err);
             this->code = code;
       }
 
-      friend std::ostream& operator<<(std::ostream& o, const returnType& r) {
+      friend std::ostream& operator<<(std::ostream& o, const ReturnType& r) {
             switch (r.t) {
-                  case returnType::type::number:
+                  case ReturnType::type::number:
                         o << r.i;
                         break;
 
-                  case returnType::type::floatingpoint:
+                  case ReturnType::type::floatingpoint:
                         o << r.d;
                         break;
 
-                  case returnType::type::string:
+                  case ReturnType::type::string:
                         o << *r.s;
                         break;
 
-                  case returnType::type::tree:
+                  case ReturnType::type::tree:
                         if (r.tr->isEmpty())
                               o << " -1";
                         else
@@ -229,7 +266,7 @@ struct returnType
                                     o << " " << x;
                         break;
 
-                  case returnType::type::error:
+                  case ReturnType::type::error:
                         o << "error code: " << r.code << "\n";
                         o << "error message:\n\t" << r.err << "\n";
                         break;
@@ -240,7 +277,7 @@ struct returnType
             return o;
       }
 
-      ~returnType() {
+      ~ReturnType() {
             switch (t) {
                   case type::list:
                         delete l;

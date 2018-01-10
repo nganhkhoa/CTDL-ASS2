@@ -456,6 +456,7 @@ class AVLTree {
       bool balance(AVLNode<T>*& pR);
 
 
+    public:
       class const_iterator {
           protected:
             AVLNode<T>* current;

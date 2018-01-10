@@ -135,14 +135,14 @@ void releaseVMGlobalData(void* pGData);
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
 
 
-returnType request1(VM_Request&, AVLTree<VM_Record>&);
-returnType request2(VM_Request&, AVLTree<VM_Record>&, const size_t&);
-returnType request3(VM_Request&, AVLTree<VM_Record>&, const size_t&);
-returnType request4(VM_Request&, AVLTree<VM_Record>&, const size_t&);
-returnType request5(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
-returnType request6(VM_Request&, AVLTree<VM_Record>&);
-returnType request7(VM_Request&);
-returnType request8(VM_Request&);
-returnType request9(VM_Request&);
+ReturnType request1(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request2(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request3(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request4(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request5(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
+ReturnType request6(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request7(VM_Request&);
+ReturnType request8(VM_Request&);
+ReturnType request9(VM_Request&);
 
 #endif    // DSA171A2_DBLIB_H

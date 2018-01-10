@@ -91,7 +91,7 @@ void releaseVMGlobalData(void* pGData) {
 }
 
 
-bool print(returnType&, VM_Request&);
+bool print(ReturnType&, VM_Request&);
 
 bool processRequest(
    VM_Request&        request,
@@ -113,7 +113,7 @@ bool processRequest(
 
       size_t vehicles_size = vehicles->getSize();
 
-      returnType r;
+      ReturnType r;
 
       switch (request.code[0] - '0') {
             case 1:
@@ -151,7 +151,7 @@ bool processRequest(
 }
 
 
-returnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
+ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
 
       if (records.isEmpty())
             return {(int) -1};
@@ -194,11 +194,11 @@ returnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
       string relative_lon = ret_1->RelativeLongitudeTo(*ret_2);
       double relative_dis = ret_1->DistanceTo(*ret_2);
 
-      returnType lat(relative_lat);
-      returnType lon(relative_lon);
-      returnType distance(relative_dis);
+      ReturnType lat(relative_lat);
+      ReturnType lon(relative_lon);
+      ReturnType distance(relative_dis);
 
-      auto ret = new L1List<returnType>();
+      auto ret = new L1List<ReturnType>();
       ret->insertHead(distance);
       ret->insertHead(lat);
       ret->insertHead(lon);
@@ -206,7 +206,7 @@ returnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
       return {ret};
 }
 
-returnType request2(
+ReturnType request2(
    VM_Request&         req,
    AVLTree<VM_Record>& records,
    const size_t&       vehicles_size) {
@@ -236,7 +236,7 @@ returnType request2(
       return {(int) result.getSize()};
 }
 
-returnType request3(
+ReturnType request3(
    VM_Request&         req,
    AVLTree<VM_Record>& records,
    const size_t&       vehicles_size) {
@@ -266,7 +266,7 @@ returnType request3(
       return {(int) result.getSize()};
 }
 
-returnType request4(
+ReturnType request4(
    VM_Request&         req,
    AVLTree<VM_Record>& records,
    const size_t&       vehicles_size) {
@@ -319,7 +319,7 @@ returnType request4(
       return {(int) result.getSize()};
 }
 
-returnType request5(
+ReturnType request5(
    VM_Request&         req,
    AVLTree<VM_Record>& records,
    AVLTree<string>&    vehicles) {
@@ -366,7 +366,7 @@ returnType request5(
 
       return {occurence};
 }
-returnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
+ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
       if (records.isEmpty()) {
             string ret = "-1 - -1";
             return {ret};
@@ -374,30 +374,30 @@ returnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
 
       return {false};
 }
-returnType request7(VM_Request& req) {
+ReturnType request7(VM_Request& req) {
       return {false};
 }
-returnType request8(VM_Request& req) {
+ReturnType request8(VM_Request& req) {
       return {false};
 }
-returnType request9(VM_Request& req) {
+ReturnType request9(VM_Request& req) {
       return {false};
 }
 
 
-bool print(returnType& r, VM_Request& req) {
+bool print(ReturnType& r, VM_Request& req) {
       switch (r.t) {
-            case returnType::type::empty:
+            case ReturnType::type::empty:
                   return false;
 
-            case returnType::type::boolean:
+            case ReturnType::type::boolean:
                   return false;
 
-            case returnType::type::error:
+            case ReturnType::type::error:
                   cout << r;
                   return false;
 
-            case returnType::type::list:
+            case ReturnType::type::list:
                   cout << req.code << ":";
 
                   if (r.l->isEmpty())
