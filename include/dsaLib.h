@@ -110,6 +110,92 @@ class L1List {
                   p = p->pNext;
             }
       }
+
+
+      /**
+       * Iterator
+       */
+
+      class const_iterator {
+          protected:
+            L1Item<T>* current;
+
+            T& retrieve() const {
+                  return current->data;
+            }
+
+            const_iterator(L1Item<T>* i) {
+                  current = i;
+            }
+
+            friend class L1List<T>;
+
+          public:
+            const_iterator() : current(nullptr) {}
+
+            const T& operator*() const {
+                  return retrieve();
+            }
+
+            const_iterator operator++() {
+                  current = current->pNext;
+                  return (*this);
+            }
+
+            const_iterator operator++(int) {
+                  const_iterator old = (*this);
+                  ++(*this);
+                  return old;
+            }
+
+            bool operator==(const const_iterator& c) const {
+                  return current == c.current;
+            }
+            bool operator!=(const const_iterator& c) const {
+                  return !((*this) == c);
+            }
+      };
+      class iterator : public const_iterator {
+          protected:
+            iterator(L1Item<T>* i) : const_iterator(i) {}
+
+            friend class L1List<T>;
+
+          public:
+            iterator() {}
+
+            T& operator*() {
+                  return this->retrieve();
+            }
+
+            const T& operator*() const {
+                  return this->retrieve();
+            }
+
+            iterator operator++() {
+                  this->current = this->current->pNext;
+                  return (*this);
+            }
+
+            iterator operator++(int) {
+                  iterator old = *this;
+                  ++(*this);
+                  return old;
+            }
+      };
+
+      iterator begin() {
+            return {_pHead};
+      }
+      const_iterator begin() const {
+            return {_pHead};
+      }
+      iterator end() {
+            return {nullptr};
+      }
+      const_iterator end() const {
+            return {nullptr};
+      }
 };
 
 /// Insert item to the end of the list
@@ -267,11 +353,16 @@ void L1List<T>::reverse() {
 template <class T>
 struct AVLNode
 {
-      T          _data;
-      AVLNode<T>*_pLeft, *_pRight;
+      T           _data;
+      AVLNode<T>* _pLeft;
+      AVLNode<T>* _pRight;
+      AVLNode<T>* _pParent;
+
 #ifdef AVL_USE_HEIGHT
       int _height;
-      AVLNode(T& a) : _data(a), _pLeft(nullptr), _pRight(nullptr), _height(1) {}
+      AVLNode(T& a, AVLNode<T>* parent)
+          : _data(a), _pLeft(nullptr), _pRight(nullptr), _pParent(parent),
+            _height(1) {}
 #else
       int _bFactor;
       AVLNode(T& a)
@@ -314,7 +405,7 @@ class AVLTree {
       bool insert(T& key, bool (*cmp)(T&, T&) = [](T& t1, T& t2) -> bool {
             return false;
       }) {
-            return insert(_pRoot, key, cmp);
+            return insert(_pRoot, _pRoot, key, cmp);
       }
       bool remove(T& key) {
             return remove(_pRoot, key);
@@ -332,7 +423,7 @@ class AVLTree {
     protected:
       void destroy(AVLNode<T>*& pR);
       bool find(AVLNode<T>* pR, T& key, T*& ret);
-      bool insert(AVLNode<T>*& pR, T& a, bool (*cmp)(T&, T&));
+      bool insert(AVLNode<T>*& pR, AVLNode<T>* pPr, T& a, bool (*cmp)(T&, T&));
       bool remove(AVLNode<T>*& pR, T& a);
       void traverseNLR(AVLNode<T>* pR, void (*op)(T&));
       void traverseLNR(AVLNode<T>* pR, void (*op)(T&));
@@ -363,6 +454,130 @@ class AVLTree {
       bool balanceLeft(AVLNode<T>*& pR);
       bool balanceRight(AVLNode<T>*& pR);
       bool balance(AVLNode<T>*& pR);
+
+
+      class const_iterator {
+          protected:
+            AVLNode<T>* current;
+
+            const_iterator(AVLNode<T>* n) : current(n) {}
+
+            T& retrieve() const {
+                  return current->_data;
+            }
+
+            friend class AVLTree<T>;
+
+          public:
+            const_iterator() {}
+
+            const T& operator*() const {
+                  return retrieve();
+            }
+
+            const_iterator operator++() {
+                  if (current->_pRight) {
+                        current = current->_pRight;
+                        while (current->_pLeft)
+                              current = current->_pLeft;
+                  }
+
+                  else {
+                        auto p = current->_pParent;
+
+                        while (p && current == p->_pRight) {
+                              current = p;
+                              p       = p->_pParent;
+                        }
+
+                        this->current = p;
+                  }
+
+                  return *this;
+            }
+
+            const_iterator operator++(int) {
+                  const_iterator old = *this;
+                  ++(*this);
+                  return old;
+            }
+
+            bool operator==(const const_iterator& c) const {
+                  return current == c.current;
+            }
+
+            bool operator!=(const const_iterator& c) const {
+                  return !((*this) == c);
+            }
+      };
+      class iterator : public const_iterator {
+          protected:
+            iterator(AVLNode<T>* n) : const_iterator(n) {}
+
+            friend class AVLTree<T>;
+
+          public:
+            iterator() {}
+
+            T& operator*() {
+                  return this->retrieve();
+            }
+
+            iterator operator++() {
+                  if (this->current->_pRight) {
+                        this->current = this->current->_pRight;
+                        while (this->current->_pLeft)
+                              this->current = this->current->_pLeft;
+                  }
+
+                  else {
+                        auto p = this->current->_pParent;
+
+                        while (p && this->current == p->_pRight) {
+                              this->current = p;
+                              p             = p->_pParent;
+                        }
+
+                        this->current = p;
+                  }
+
+                  return *this;
+            }
+
+            iterator operator++(int) {
+                  iterator old = *this;
+                  ++(*this);
+                  return old;
+            }
+      };
+
+      iterator begin() {
+            if (_pRoot == nullptr)
+                  return end();
+
+            auto temp = _pRoot;
+            while (temp->_pLeft)
+                  temp = temp->_pLeft;
+
+            return {temp};
+      }
+      const_iterator begin() const {
+            if (_pRoot == nullptr)
+                  return end();
+
+            auto temp = _pRoot;
+            while (temp->_pLeft)
+                  temp = temp->_pLeft;
+
+            return {temp};
+      }
+
+      iterator end() {
+            return {nullptr};
+      }
+      const_iterator end() const {
+            return {nullptr};
+      }
 };
 
 template <class T>
@@ -390,6 +605,12 @@ void AVLTree<T>::rotLeft(AVLNode<T>*& n) {
       temp->_pRight = n->_pLeft;
       n->_pLeft     = temp;
 
+      n->_pParent    = temp->_pParent;
+      temp->_pParent = n;
+
+      if (temp->_pRight)
+            temp->_pRight->_pParent = temp;
+
       temp->calibrate();
       n->calibrate();
       temp = nullptr;
@@ -401,6 +622,11 @@ void AVLTree<T>::rotRight(AVLNode<T>*& n) {
       n            = n->_pLeft;
       temp->_pLeft = n->_pRight;
       n->_pRight   = temp;
+
+      n->_pParent    = temp->_pParent;
+      temp->_pParent = n;
+      if (temp->_pLeft)
+            temp->_pLeft->_pParent = temp;
 
       temp->calibrate();
       n->calibrate();
@@ -477,9 +703,14 @@ bool AVLTree<T>::balance(AVLNode<T>*& n) {
 }
 
 template <class T>
-bool AVLTree<T>::insert(AVLNode<T>*& n, T& t, bool (*cmp)(T&, T&)) {
+bool AVLTree<T>::insert(
+   AVLNode<T>*& n,
+   AVLNode<T>*  pP,
+   T&           t,
+   bool (*cmp)(T&, T&)) {
+
       if (n == nullptr) {
-            n = new AVLNode<T>(t);
+            n = new AVLNode<T>(t, pP);
             size++;
             return true;
       }
@@ -489,10 +720,10 @@ bool AVLTree<T>::insert(AVLNode<T>*& n, T& t, bool (*cmp)(T&, T&)) {
             return false;
 
       if (t < n->_data) {
-            insert(n->_pLeft, t, cmp);
+            insert(n->_pLeft, n, t, cmp);
       }
       else {
-            insert(n->_pRight, t, cmp);
+            insert(n->_pRight, n, t, cmp);
       }
 
       n->calibrate();
@@ -539,10 +770,10 @@ bool AVLTree<T>::find(AVLNode<T>* pR, T& key, T*& ret) {
             return true;
       }
 
-      if (pR->_data > key)
-            return find(pR->_pLeft, key, ret);
-      else
+      if (pR->_data < key)
             return find(pR->_pRight, key, ret);
+      else
+            return find(pR->_pLeft, key, ret);
 }
 
 #endif    // A02_DSALIB_H
