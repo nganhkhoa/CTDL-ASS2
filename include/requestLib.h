@@ -109,17 +109,20 @@ struct returnType
             tree,
             boolean,
             floatingpoint,
-            number
+            number,
+            string
       };
-      union {                        // 4 bytes
-            L1List<string>*  l;      // 4 bytes
-            AVLTree<string>* tr;     // 4 bytes
-            bool             b;      // 2 bytes
-            double           d;      // 4 bytes
-            int              i;      // 4 bytes
-            char*            err;    // 4 bytes
+      union {                          // 4 bytes
+            L1List<returnType>* l;     // 4 bytes
+            AVLTree<string>*    tr;    // 4 bytes
+            bool                b;     // 2 bytes
+            double              d;     // 4 bytes
+            int                 i;     // 4 bytes
+            std::string*        s;
+            char*               err;    // 4 bytes
       };
       type t;
+      int  code;    // error code
 
       // ok, this struct has 2 members
       // type t, and an unnamed union
@@ -130,7 +133,45 @@ struct returnType
             t = type::empty;
       }
 
-      returnType(L1List<string>* l) {
+      returnType& operator=(const returnType& r) {
+            switch (r.t) {
+                  case type::empty:
+                        break;
+
+                  case type::error:
+                        strcpy(err, r.err);
+                        code = r.code;
+                        break;
+
+                  case type::list:
+                        l = r.l;
+                        break;
+
+                  case type::tree:
+                        tr = r.tr;
+                        break;
+
+                  case type::boolean:
+                        b = r.b;
+                        break;
+
+                  case type::floatingpoint:
+                        d = r.d;
+                        break;
+
+                  case type::number:
+                        i = r.i;
+                        break;
+
+                  case type::string:
+                        s = r.s;
+                        break;
+            }
+
+            return *this;
+      }
+
+      returnType(L1List<returnType>* l) {
             t       = type::list;
             this->l = l;
       }
@@ -155,9 +196,75 @@ struct returnType
             this->i = i;
       }
 
-      returnType(const char* err) {
+      returnType(std::string& s) {
+            t       = type::string;
+            this->s = new string(s);
+      }
+
+      returnType(int code, const char* err) {
             t = type::error;
             strcpy(this->err, err);
+            this->code = code;
+      }
+
+      friend std::ostream& operator<<(std::ostream& o, const returnType& r) {
+            switch (r.t) {
+                  case returnType::type::number:
+                        o << r.i;
+                        break;
+
+                  case returnType::type::floatingpoint:
+                        o << r.d;
+                        break;
+
+                  case returnType::type::string:
+                        o << *r.s;
+                        break;
+
+                  case returnType::type::tree:
+                        if (r.tr->isEmpty())
+                              o << " -1";
+                        else
+                              for (auto& x : *r.tr)
+                                    o << " " << x;
+                        break;
+
+                  case returnType::type::error:
+                        o << "error code: " << r.code << "\n";
+                        o << "error message:\n\t" << r.err << "\n";
+                        break;
+
+                  default:
+                        break;
+            }
+            return o;
+      }
+
+      ~returnType() {
+            switch (t) {
+                  case type::list:
+                        delete l;
+                        l = nullptr;
+                        break;
+
+                  case type::tree:
+                        delete tr;
+                        tr = nullptr;
+                        break;
+
+                  case type::string:
+                        delete s;
+                        s = nullptr;
+                        break;
+
+                  case type::error:
+                        delete[] err;
+                        err = nullptr;
+                        break;
+
+                  default:
+                        break;
+            }
       }
 };
 
