@@ -1,4 +1,5 @@
-set (AVL_TEST
+set (DATA_STRUCTURE_TEST
+      "LinkedList.cpp"
       "AVL.cpp"
 )
 
@@ -9,7 +10,7 @@ set (Request_Test
 )
 
 set (ALL_TEST
-      ${AVL_TEST}
+      ${DATA_STRUCTURE_TEST}
       ${Request_Test}
 )
 
