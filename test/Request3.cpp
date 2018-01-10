@@ -10,20 +10,19 @@ class req3_parsing : public ::testing::Test {
 
 
             VM_Record dummy;
-            List.insertHead(dummy);
+            List.insert(dummy);
       }
       virtual void TearDown() {}
 
       std::vector<std::string> wrong_req_str{"3", "3_", "3_"};
       std::vector<VM_Request>  wrong_req;
-      L1List<VM_Record>        List;
-      L1List<std::string>      vehicles;
+      AVLTree<VM_Record>       List;
 };
 
 
 TEST_F(req3_parsing, wrong_code) {
       for (auto& req : wrong_req) {
-            auto ret = request2(req, List, vehicles);
+            auto ret = request2(req, List, 0);
             ASSERT_EQ(returnType::type::boolean, ret.t);
             EXPECT_FALSE(ret.b);
       }

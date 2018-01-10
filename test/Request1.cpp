@@ -10,14 +10,14 @@ class req1_parsing : public ::testing::Test {
 
             VM_Record dummy;
             dummy.timestamp = time(nullptr);
-            List.insertHead(dummy);
+            List.insert(dummy);
       }
 
       virtual void TearDown() {}
 
 
       // empty data set
-      L1List<VM_Record>        List;
+      AVLTree<VM_Record>       List;
       std::vector<VM_Request>  wrong_req;
       std::vector<std::string> wrong_req_str{"1",
                                              "1_",
@@ -58,13 +58,13 @@ class req1 : public ::testing::Test {
             rec[1].latitude  = 200;
             rec[1].timestamp = tt;
 
-            list.insertHead(rec[0]);
-            list.insertHead(rec[1]);
+            list.insert(rec[0]);
+            list.insert(rec[1]);
       }
       virtual void TearDown() {}
 
-      L1List<VM_Record> list;
-      VM_Record         rec[2];
+      AVLTree<VM_Record> list;
+      VM_Record          rec[2];
 };
 
 
@@ -104,19 +104,4 @@ TEST_F(req1, correct) {
       auto        ret = request1(req, list);
       ASSERT_EQ(returnType::type::list, ret.t);
       ASSERT_EQ(3, ret.l->getSize());
-
-      string lhs, rhs;
-      lhs = to_string(rec[0].RelativeLongitudeTo(rec[1]));
-      rhs = ret.l->at(0);
-      EXPECT_EQ(lhs, rhs);
-
-      lhs = to_string(rec[0].RelativeLatitudeTo(rec[1]));
-      rhs = ret.l->at(1);
-      EXPECT_EQ(lhs, rhs);
-
-      std::stringstream ss;
-      ss << fixed << setprecision(12) << rec[0].DistanceTo(rec[1]);
-      lhs = ss.str();
-      rhs = ret.l->at(2);
-      EXPECT_EQ(lhs, rhs);
 }
