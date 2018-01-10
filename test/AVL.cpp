@@ -21,15 +21,13 @@ TEST(AVL, assending) {
                       {9, 1}};
 
       auto list = avl.getListNode();
-      list->traverse(
-         [](AVLNode<int>*& n, void* v) {
-               static int i      = 0;
-               node*      sample = (node*) v;
-               EXPECT_EQ(n->_data, sample[i].data);
-               EXPECT_EQ(n->_height, sample[i].height);
-               i++;
-         },
-         sample);
+
+      int i = 0;
+      for (auto& n : *list) {
+            EXPECT_EQ(n->_data, sample[i].data);
+            EXPECT_EQ(n->_height, sample[i].height);
+            i++;
+      }
 
       delete list;
       list = nullptr;
@@ -56,15 +54,13 @@ TEST(AVL, dessending) {
                       {10, 1}};
 
       auto list = avl.getListNode();
-      list->traverse(
-         [](AVLNode<int>*& n, void* v) {
-               static int i      = 0;
-               node*      sample = (node*) v;
-               EXPECT_EQ(n->_data, sample[i].data);
-               EXPECT_EQ(n->_height, sample[i].height);
-               i++;
-         },
-         sample);
+
+      int i = 0;
+      for (auto& n : *list) {
+            EXPECT_EQ(n->_data, sample[i].data);
+            EXPECT_EQ(n->_height, sample[i].height);
+            i++;
+      }
 
       delete list;
       list = nullptr;
@@ -98,15 +94,13 @@ TEST(AVL, random1) {
                       {79, 2}};
 
       auto list = avl.getListNode();
-      list->traverse(
-         [](AVLNode<int>*& n, void* v) {
-               static int i      = 0;
-               node*      sample = (node*) v;
-               EXPECT_EQ(n->_data, sample[i].data);
-               EXPECT_EQ(n->_height, sample[i].height);
-               i++;
-         },
-         sample);
+
+      int i = 0;
+      for (auto& n : *list) {
+            EXPECT_EQ(n->_data, sample[i].data);
+            EXPECT_EQ(n->_height, sample[i].height);
+            i++;
+      }
 
       delete list;
       list = nullptr;
