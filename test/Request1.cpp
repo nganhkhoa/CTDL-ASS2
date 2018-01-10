@@ -26,14 +26,13 @@ class req1_parsing : public ::testing::Test {
                                              "1_1_1_1",
                                              "1_1_1_11",
                                              "1_1_1_111",
-                                             "1_1_1_1111",
-                                             "1_1_1_11111"};
+                                             "1_1_1_1111"};
 };
 
 TEST_F(req1_parsing, wrong_code) {
       for (auto& req : wrong_req) {
             auto ret = request1(req, List);
-            ASSERT_EQ(returnType::type::boolean, ret.t);
+            ASSERT_EQ(ReturnType::type::boolean, ret.t) << req.code;
             EXPECT_FALSE(ret.b);
       }
 }
@@ -73,35 +72,35 @@ TEST_F(req1, not_found) {
       std::string str = "1_0_0_111111";
       VM_Request  req(str);
       auto        ret = request1(req, list);
-      ASSERT_EQ(returnType::type::boolean, ret.t);
-      EXPECT_FALSE(ret.b);
+      ASSERT_EQ(ReturnType::type::number, ret.t);
+      EXPECT_EQ(-1, ret.i);
 
       // first car not found
       str = "1_0_1_111111";
       strcpy(req.code, str.c_str());
       ret = request1(req, list);
-      ASSERT_EQ(returnType::type::boolean, ret.t);
-      EXPECT_FALSE(ret.b);
+      ASSERT_EQ(ReturnType::type::number, ret.t);
+      EXPECT_EQ(-1, ret.i);
 
       // second car not found
       str = "1_1_0_111111";
       strcpy(req.code, str.c_str());
       ret = request1(req, list);
-      ASSERT_EQ(returnType::type::boolean, ret.t);
-      EXPECT_FALSE(ret.b);
+      ASSERT_EQ(ReturnType::type::number, ret.t);
+      EXPECT_EQ(-1, ret.i);
 
       // wrong timestamp
       str = "1_1_0_111110";
       strcpy(req.code, str.c_str());
       ret = request1(req, list);
-      ASSERT_EQ(returnType::type::boolean, ret.t);
-      EXPECT_FALSE(ret.b);
+      ASSERT_EQ(ReturnType::type::number, ret.t);
+      EXPECT_EQ(-1, ret.i);
 }
 
 TEST_F(req1, correct) {
       std::string str = "1_1_2_111111";
       VM_Request  req(str);
       auto        ret = request1(req, list);
-      ASSERT_EQ(returnType::type::list, ret.t);
+      ASSERT_EQ(ReturnType::type::list, ret.t);
       ASSERT_EQ(3, ret.l->getSize());
 }
