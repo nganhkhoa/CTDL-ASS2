@@ -136,13 +136,13 @@ void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
 
 
 returnType request1(VM_Request&, AVLTree<VM_Record>&);
-returnType request2(VM_Request&, L1List<VM_Record>&, AVLTree<string>&);
-returnType request3(VM_Request&, L1List<VM_Record>&, AVLTree<string>&);
-returnType request4(VM_Request&, L1List<VM_Record>&, AVLTree<string>&);
-returnType request5(VM_Request&, L1List<VM_Record>&);
-returnType request6(VM_Request&, L1List<VM_Record>&);
-returnType request7();
-returnType request8();
-returnType request9();
+returnType request2(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+returnType request3(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+returnType request4(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+returnType request5(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
+returnType request6(VM_Request&, AVLTree<VM_Record>&);
+returnType request7(VM_Request&);
+returnType request8(VM_Request&);
+returnType request9(VM_Request&);
 
 #endif    // DSA171A2_DBLIB_H

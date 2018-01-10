@@ -111,6 +111,8 @@ bool processRequest(
       auto vehicles = (AVLTree<string>*) data[0];
       auto records  = (AVLTree<VM_Record>*) data[1];
 
+      size_t vehicles_size = vehicles->getSize();
+
       returnType r;
 
       switch (request.code[0] - '0') {
@@ -118,20 +120,28 @@ bool processRequest(
                   r = request1(request, *records);
                   break;
             case 2:
+                  r = request2(request, *records, vehicles_size);
                   break;
             case 3:
+                  r = request3(request, *records, vehicles_size);
                   break;
             case 4:
+                  r = request4(request, *records, vehicles_size);
                   break;
             case 5:
+                  r = request5(request, *records, *vehicles);
                   break;
             case 6:
+                  r = request6(request, *records);
                   break;
             case 7:
+                  r = request7(request);
                   break;
             case 8:
+                  r = request8(request);
                   break;
             case 9:
+                  r = request9(request);
                   break;
             default:
                   break;
@@ -195,9 +205,14 @@ returnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
 
       return {ret};
 }
-returnType request2(VM_Request& req, AVLTree<VM_Record>& records) {
+
+returnType request2(
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   const size_t&       vehicles_size) {
+
       if (records.isEmpty())
-            return {false};
+            return {(int) 0};
 
       char   direction;
       int    req_id;
@@ -212,71 +227,160 @@ returnType request2(VM_Request& req, AVLTree<VM_Record>& records) {
                   string id(x.id);
                   result.insert(
                      id, [](string& Old, string& New) { return Old == New; });
+
+                  if (result.getSize() == vehicles_size)
+                        break;
             }
       }
 
       return {(int) result.getSize()};
 }
+
 returnType request3(
-   VM_Request&        req,
-   L1List<VM_Record>& list,
-   AVLTree<string>&   vehicles) {
-      if (list.isEmpty())
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   const size_t&       vehicles_size) {
+
+      if (records.isEmpty())
+            return {(int) 0};
+
+      char   direction;
+      int    req_id;
+      double lat;
+      if (sscanf(req.code, "%1d_%lf_%1[NS]", &req_id, &lat, &direction) != 3)
             return {false};
 
-      char direction;
-      if (
-         sscanf(
-            req.code,
-            "%1lf_%lf_%1[NS]",
-            &req.params[0],    // request id
-            &req.params[1],    // a coordinate
-            &direction)        // direction
-         != 3)
-            return {false};
+      AVLTree<string> result;
+      for (auto& x : records) {
+            string relative_lat = x.RelativeLatitudeTo(lat);
+            if (relative_lat[0] != direction) {
+                  string id(x.id);
+                  result.insert(
+                     id, [](string& Old, string& New) { return Old == New; });
+
+                  if (result.getSize() == vehicles_size)
+                        break;
+            }
+      }
+
+      return {(int) result.getSize()};
 }
+
 returnType request4(
-   VM_Request&        req,
-   L1List<VM_Record>& list,
-   AVLTree<string>&   vehicles) {
-      if (list.isEmpty())
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   const size_t&       vehicles_size) {
+
+      if (records.isEmpty())
             return {(int) 0};
+
+      int    req_id;
+      double lon;
+      double lat;
+      double radius;
+      int    start;
+      int    end;
 
       if (
          sscanf(
             req.code,
-            "%1lf_%lf_%lf_%lf_%lf_%lf",
-            &req.params[0],    // 1 number
-            &req.params[1],    // atmost 10 Along with sign
-            &req.params[2],    // atmost 10 Alat with sign
-            &req.params[3],    // R
-            &req.params[4],    // H1
-            &req.params[5])    // H2
-         != 6)
+            "%1d_%lf_%lf_%lf_%d_%d",
+            &req_id,
+            &lon,
+            &lat,
+            &radius,
+            &start,
+            &end) != 6)
             return {false};
 
-      auto& start = req.params[4];
-      auto& end   = req.params[5];
+      AVLTree<string> result;
+      for (auto& x : records) {
+            int hour = gmtime(&x.timestamp)->tm_hour;
+            if (hour < start)
+                  continue;
 
-      // time constrain
-      if (start >= end)
-            return {false};
+            if (hour > end)
+                  // our tree is build with time order
+                  // if time is bigger then we need
+                  break;
+
+            double distance = x.DistanceTo(lat, lon);
+
+            if (distance <= radius) {
+                  string id(x.id);
+                  result.insert(
+                     id, [](string& Old, string& New) { return Old == New; });
+
+                  if (result.getSize() == vehicles_size)
+                        break;
+            }
+      }
+
+      return {(int) result.getSize()};
 }
-returnType request5(VM_Request& req, L1List<VM_Record>& list) {
-      if (list.isEmpty())
+
+returnType request5(
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   AVLTree<string>&    vehicles) {
+
+      if (records.isEmpty())
             return {(int) 0};
+
+      int    req_id;
+      char   char_id[ID_MAX_LENGTH];
+      double lat;
+      double lon;
+      double radius;
+
+      if (
+         sscanf(
+            req.code,
+            "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
+            &req_id,
+            char_id,
+            &lon,
+            &lat,
+            &radius) != 5)
+            return {false};
+
+      string  id(char_id);
+      string* ret;
+      if (!vehicles.find(id, ret)) {
+            ret = nullptr;
+            return {int(0)};
+      }
+      ret = nullptr;
+
+
+      int occurence = 0;
+      for (auto& x : records) {
+            if (strcmp(x.id, char_id) != 0)
+                  continue;
+
+            double distance = x.DistanceTo(lat, lon);
+
+            if (distance <= radius)
+                  occurence++;
+      }
+
+      return {occurence};
 }
-returnType request6(VM_Request& req, L1List<VM_Record>& list) {
-      if (list.isEmpty())
-            return {};
-}
-returnType request7() {
+returnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
+      if (records.isEmpty()) {
+            string ret = "-1 - -1";
+            return {ret};
+      }
+
       return {false};
 }
-returnType request8() {
+returnType request7(VM_Request& req) {
       return {false};
 }
-returnType request9() {
+returnType request8(VM_Request& req) {
+      return {false};
+}
+returnType request9(VM_Request& req) {
       return {false};
 }
 
@@ -287,7 +391,6 @@ bool print(returnType& r, VM_Request& req) {
                   return false;
 
             case returnType::type::boolean:
-                  cout << req.code << ": -1\n";
                   return false;
 
             case returnType::type::error:
@@ -301,11 +404,13 @@ bool print(returnType& r, VM_Request& req) {
                         cout << " -1";
 
                   else if (req.code[0] == 1)
+                        // list of request 1
                         for (auto& x : *r.l)
                               cout << " " << x;
 
                   else
-                        // list of tree id
+                        // list of tree ids
+                        // <tree 1> - <tree 2>
                         for (auto& x : *r.l)
                               cout << x << " -";
 
@@ -316,5 +421,7 @@ bool print(returnType& r, VM_Request& req) {
             default:
                   cout << req.code << ": " << r << "\n";
                   return true;
-      };
+      }
+
+      return false;
 }
