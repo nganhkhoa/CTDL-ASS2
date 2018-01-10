@@ -13,7 +13,7 @@
  * Docker:
  * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
  *
- * Library use with define so no affect on building online
+ * Libraries are used with define so no affect on building online
  *
  * Libraries used:
  *    Spdlog: https://github.com/gabime/spdlog
@@ -39,37 +39,35 @@ using namespace std;
 
 
 bool initVMGlobalData(void** pGData) {
-      auto vehicleTree = new AVLTree<string>();
-      auto rList       = (L1List<VM_Record>*) *pGData;
+      auto vehicles = new AVLTree<string>();
+      auto records  = new AVLTree<VM_Record>();
+      auto rList    = (L1List<VM_Record>*) *pGData;
 
-      rList->traverse(
-         [](VM_Record& vmr, void* v) {
-               auto    tree = (AVLTree<string>*) v;
-               string  id(vmr.id);
-               string* ret = nullptr;
-               if (tree->find(id, ret))
-                     return;
+      for (auto& vmr : *rList) {
+            string id(vmr.id);
+            vehicles->insert(
+               id, [](string& Old, string& New) { return Old == New; });
 
-               tree->insert(id);
-         },
-         vehicleTree);
+            VM_Record r = vmr;
+            records->insert(r);
+      }
 
-      *pGData = vehicleTree;
+      auto data = new void*[2];
+      data[0]   = vehicles;
+      data[1]   = records;
+
+      *pGData = data;
 
 #ifdef DEBUGGING
       auto console = spdlog::get("console.log");
       auto file    = spdlog::get("file.log");
-      console->info("{} vehicles", vehicleTree->getSize());
-      file->info("{} vehicles", vehicleTree->getSize());
+      console->info("{} vehicles", vehicles->getSize());
+      file->info("{} vehicles", vehicles->getSize());
 
-      auto   list = vehicleTree->getListNode();
       string str;
-      list->traverse(
-         [](AVLNode<string>*& n, void* v) {
-               auto str = (string*) v;
-               *str += " " + n->_data;
-         },
-         &str);
+      for (auto& s : *vehicles) {
+            str += " " + s;
+      }
 
       file->info("vehicles:\n{}", str);
 #endif
@@ -78,14 +76,22 @@ bool initVMGlobalData(void** pGData) {
 }
 
 void releaseVMGlobalData(void* pGData) {
-      auto vehicleTree = (AVLTree<string>*) pGData;
-      delete vehicleTree;
-      vehicleTree = nullptr;
-      pGData      = nullptr;
+      auto data     = (void**) pGData;
+      auto vehicles = (AVLTree<string>*) data[0];
+      auto records  = (AVLTree<VM_Record>*) data[1];
+
+      delete vehicles;
+      delete records;
+      delete data;
+
+      vehicles = nullptr;
+      records  = nullptr;
+      data     = nullptr;
+      pGData   = nullptr;
 }
 
 
-bool print(returnType&, VM_Request&);
+bool print(ReturnType&, VM_Request&);
 
 bool processRequest(
    VM_Request&        request,
@@ -101,37 +107,41 @@ bool processRequest(
       file->info("processing request {}", request.code);
 #endif
 
-      auto vehicleTree = (AVLTree<string>*) pGData;
+      auto data     = (void**) pGData;
+      auto vehicles = (AVLTree<string>*) data[0];
+      auto records  = (AVLTree<VM_Record>*) data[1];
 
-      returnType r;
+      size_t vehicles_size = vehicles->getSize();
+
+      ReturnType r;
 
       switch (request.code[0] - '0') {
             case 1:
-                  r = request1(request, recordList);
+                  r = request1(request, *records);
                   break;
             case 2:
-                  r = request2();
+                  r = request2(request, *records, vehicles_size);
                   break;
             case 3:
-                  r = request3();
+                  r = request3(request, *records, vehicles_size);
                   break;
             case 4:
-                  r = request4();
+                  r = request4(request, *records, vehicles_size);
                   break;
             case 5:
-                  r = request5();
+                  r = request5(request, *records, *vehicles);
                   break;
             case 6:
-                  r = request6();
+                  r = request6(request, *records);
                   break;
             case 7:
-                  r = request7();
+                  r = request7(request);
                   break;
             case 8:
-                  r = request8();
+                  r = request8(request);
                   break;
             case 9:
-                  r = request9();
+                  r = request9(request);
                   break;
             default:
                   break;
@@ -141,140 +151,277 @@ bool processRequest(
 }
 
 
-returnType request1(VM_Request& request, L1List<VM_Record>& list) {
+ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
 
-      if (list.isEmpty())
-            return {false};
+      if (records.isEmpty())
+            return {(int) -1};
 
-      auto thisTime = localtime(&list.at(0).timestamp);
+      auto sample   = *(records.begin());
+      auto thisTime = gmtime(&sample.timestamp);
+
       if (thisTime == nullptr)
             return {"cannot get time from data"};
 
       VM_Record car_1, car_2;
+
+      int req_id;
       if (
          sscanf(    // 1_X_Y_hhmmss
             request.code,
-            "%1lf_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
-            &request.params[0],
-            car_1.id,
-            car_2.id,
-            &thisTime->tm_hour,
-            &thisTime->tm_min,
-            &thisTime->tm_sec) != 6)
+            "%1d_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
+            &req_id,               // request id
+            car_1.id,              // id of vehicle number 1
+            car_2.id,              // id of vehicle number 2
+            &thisTime->tm_hour,    // hour
+            &thisTime->tm_min,     // minute
+            &thisTime->tm_sec)     // second
+         != 6)
             return {false};
 
       car_1.timestamp = timegm(thisTime);
       car_2.timestamp = timegm(thisTime);
 
-      vector<VM_Record> record;
-      record.push_back(car_1);
-      record.push_back(car_2);
+      VM_Record* ret_1 = nullptr;
+      VM_Record* ret_2 = nullptr;
 
-      try {
-            list.traverse(
-               [](VM_Record& r, void* v) {
-                     auto record = (vector<VM_Record>*) v;
+      records.find(car_1, ret_1);
+      records.find(car_2, ret_2);
 
-                     auto& record_1 = record->at(0);
-                     if (
-                        strcmp(r.id, record_1.id) == 0 &&
-                        r.timestamp == record_1.timestamp) {
-                           record_1 = r;
-                     }
+      if (ret_1 == nullptr || ret_2 == nullptr)
+            return {(int) -1};
 
-                     auto& record_2 = record->at(1);
-                     if (
-                        strcmp(r.id, record_2.id) == 0 &&
-                        r.timestamp == record_2.timestamp) {
-                           record_2 = r;
-                     }
-               },
-               &record);
-      } catch (std::exception& e) {
-      }
+      string relative_lat = ret_1->RelativeLatitudeTo(*ret_2);
+      string relative_lon = ret_1->RelativeLongitudeTo(*ret_2);
+      double relative_dis = ret_1->DistanceTo(*ret_2);
 
-      if (
-         record.at(0).longitude == 0 || record.at(0).latitude == 0 ||
-         record.at(1).longitude == 0 || record.at(1).latitude == 0)
-            return {false};
+      ReturnType lat(relative_lat);
+      ReturnType lon(relative_lon);
+      ReturnType distance(relative_dis);
 
-      auto ret = new L1List<string>();
-
-      char RelativeLat = record.at(0).RelativeLatitudeTo(record.at(1));
-      char RelativeLon = record.at(0).RelativeLongitudeTo(record.at(1));
-
-      stringstream ss;
-      ss << fixed << setprecision(12) << record.at(0).DistanceTo(record.at(1));
-
-      string distance = ss.str();
-      string lat      = to_string(RelativeLat);
-      string lon      = to_string(RelativeLon);
-
-      ret->push_back(lon);
-      ret->push_back(lat);
-      ret->push_back(distance);
+      auto ret = new L1List<ReturnType>();
+      ret->insertHead(distance);
+      ret->insertHead(lat);
+      ret->insertHead(lon);
 
       return {ret};
 }
-returnType request2() {
+
+ReturnType request2(
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   const size_t&       vehicles_size) {
+
+      if (records.isEmpty())
+            return {(int) 0};
+
+      char   direction;
+      int    req_id;
+      double lon;
+      if (sscanf(req.code, "%1d_%lf_%1[EW]", &req_id, &lon, &direction) != 3)
+            return {false};
+
+      AVLTree<string> result;
+      for (auto& x : records) {
+            string relative_lon = x.RelativeLongitudeTo(lon);
+            if (relative_lon[0] != direction) {
+                  string id(x.id);
+                  result.insert(
+                     id, [](string& Old, string& New) { return Old == New; });
+
+                  if (result.getSize() == vehicles_size)
+                        break;
+            }
+      }
+
+      return {(int) result.getSize()};
+}
+
+ReturnType request3(
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   const size_t&       vehicles_size) {
+
+      if (records.isEmpty())
+            return {(int) 0};
+
+      char   direction;
+      int    req_id;
+      double lat;
+      if (sscanf(req.code, "%1d_%lf_%1[NS]", &req_id, &lat, &direction) != 3)
+            return {false};
+
+      AVLTree<string> result;
+      for (auto& x : records) {
+            string relative_lat = x.RelativeLatitudeTo(lat);
+            if (relative_lat[0] != direction) {
+                  string id(x.id);
+                  result.insert(
+                     id, [](string& Old, string& New) { return Old == New; });
+
+                  if (result.getSize() == vehicles_size)
+                        break;
+            }
+      }
+
+      return {(int) result.getSize()};
+}
+
+ReturnType request4(
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   const size_t&       vehicles_size) {
+
+      if (records.isEmpty())
+            return {(int) 0};
+
+      int    req_id;
+      double lon;
+      double lat;
+      double radius;
+      int    start;
+      int    end;
+
+      if (
+         sscanf(
+            req.code,
+            "%1d_%lf_%lf_%lf_%d_%d",
+            &req_id,
+            &lon,
+            &lat,
+            &radius,
+            &start,
+            &end) != 6)
+            return {false};
+
+      AVLTree<string> result;
+      for (auto& x : records) {
+            int hour = gmtime(&x.timestamp)->tm_hour;
+            if (hour < start)
+                  continue;
+
+            if (hour > end)
+                  // our tree is build with time order
+                  // if time is bigger then we need
+                  break;
+
+            double distance = x.DistanceTo(lat, lon);
+
+            if (distance <= radius) {
+                  string id(x.id);
+                  result.insert(
+                     id, [](string& Old, string& New) { return Old == New; });
+
+                  if (result.getSize() == vehicles_size)
+                        break;
+            }
+      }
+
+      return {(int) result.getSize()};
+}
+
+ReturnType request5(
+   VM_Request&         req,
+   AVLTree<VM_Record>& records,
+   AVLTree<string>&    vehicles) {
+
+      if (records.isEmpty())
+            return {(int) 0};
+
+      int    req_id;
+      char   char_id[ID_MAX_LENGTH];
+      double lat;
+      double lon;
+      double radius;
+
+      if (
+         sscanf(
+            req.code,
+            "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
+            &req_id,
+            char_id,
+            &lon,
+            &lat,
+            &radius) != 5)
+            return {false};
+
+      string  id(char_id);
+      string* ret;
+      if (!vehicles.find(id, ret)) {
+            ret = nullptr;
+            return {int(0)};
+      }
+      ret = nullptr;
+
+
+      int occurence = 0;
+      for (auto& x : records) {
+            if (strcmp(x.id, char_id) != 0)
+                  continue;
+
+            double distance = x.DistanceTo(lat, lon);
+
+            if (distance <= radius)
+                  occurence++;
+      }
+
+      return {occurence};
+}
+ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
+      if (records.isEmpty()) {
+            string ret = "-1 - -1";
+            return {ret};
+      }
+
       return {false};
 }
-returnType request3() {
+ReturnType request7(VM_Request& req) {
       return {false};
 }
-returnType request4() {
+ReturnType request8(VM_Request& req) {
       return {false};
 }
-returnType request5() {
-      return {false};
-}
-returnType request6() {
-      return {false};
-}
-returnType request7() {
-      return {false};
-}
-returnType request8() {
-      return {false};
-}
-returnType request9() {
+ReturnType request9(VM_Request& req) {
       return {false};
 }
 
 
-bool print(returnType& r, VM_Request& req) {
+bool print(ReturnType& r, VM_Request& req) {
       switch (r.t) {
-            case returnType::type::empty:
-                  return false;
-            case returnType::type::boolean:
-                  cout << req.code << ": -1\n";
+            case ReturnType::type::empty:
                   return false;
 
-            case returnType::type::list:
+            case ReturnType::type::boolean:
+                  return false;
+
+            case ReturnType::type::error:
+                  cout << r;
+                  return false;
+
+            case ReturnType::type::list:
                   cout << req.code << ":";
+
                   if (r.l->isEmpty())
                         cout << " -1";
+
+                  else if (req.code[0] == 1)
+                        // list of request 1
+                        for (auto& x : *r.l)
+                              cout << " " << x;
+
                   else
-                        r.l->traverse([](string& s) { cout << " " << s; });
+                        // list of tree ids
+                        // <tree 1> - <tree 2>
+                        for (auto& x : *r.l)
+                              cout << x << " -";
+
                   cout << "\n";
-                  delete r.l;
-                  r.l = nullptr;
                   return true;
 
-            case returnType::type::tree:
-                  return true;
-
-            case returnType::type::floatingpoint:
-                  cout << req.code << ": " << fixed << setprecision(12) << r.d
-                       << "\n";
-                  return true;
-
-            case returnType::type::number:
-                  cout << req.code << ": " << r.i << "\n";
-                  return true;
 
             default:
-                  // we should not get here
-                  return false;
-      };
+                  cout << req.code << ": " << r << "\n";
+                  return true;
+      }
+
+      return false;
 }

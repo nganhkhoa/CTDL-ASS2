@@ -17,7 +17,7 @@
  * Docker:
  * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
  *
- * Library use with define so no affect on building online
+ * Libraries are used with define so no affect on building online
  *
  * Libraries used:
  *    Spdlog: https://github.com/gabime/spdlog
@@ -41,7 +41,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#define REQUEST_CODE_SIZE 16
+#define REQUEST_CODE_SIZE 100
 #define MAX_PARAM_SIZE 6
 using namespace std;
 
@@ -54,7 +54,7 @@ typedef struct VM_Request
             *code   = '0';    // default event is "0"
             code[1] = 0;
       }
-      VM_Request(char* str) {
+      VM_Request(const char* str) {
             strncpy(code, str, REQUEST_CODE_SIZE - 1);
       }
       VM_Request(string& str) {
@@ -80,7 +80,7 @@ typedef struct VM_Request
 } VM_Request;
 
 
-struct returnType
+struct ReturnType
 {
       /**
        * Return with type empty or boolean
@@ -95,10 +95,11 @@ struct returnType
        *    => print number
        *
        * Return with type list
-       *    => print the item
+       *    => print the items
        *
        * Return with type tree
        *    => print by traversing LNR
+       *    => sorted data printing
        */
       enum class type : int
       {
@@ -108,53 +109,199 @@ struct returnType
             tree,
             boolean,
             floatingpoint,
-            number
+            number,
+            string
       };
-      union {                        // 4 bytes
-            L1List<string>*  l;      // 4 bytes
-            AVLTree<string>* tr;     // 4 bytes
-            bool             b;      // 2 bytes
-            double           d;      // 4 bytes
-            int              i;      // 4 bytes
-            char*            err;    // 4 bytes
+      union {                          // 4 bytes
+            L1List<ReturnType>* l;     // 4 bytes
+            AVLTree<string>*    tr;    // 4 bytes
+            bool                b;     // 2 bytes
+            double              d;     // 4 bytes
+            int                 i;     // 4 bytes
+            std::string*        s;
+            char*               err;    // 4 bytes
       };
       type t;
+      int  code;    // error code
 
-      // ok, this struct has 2 members
-      // type t, and an unnamed union
-
-      returnType() {
+      ReturnType() {
             t = type::empty;
       }
 
-      returnType(L1List<string>* l) {
+      ReturnType(const ReturnType& r) {
+            switch (r.t) {
+                  case type::empty:
+                        break;
+
+                  case type::error:
+                        strcpy(err, r.err);
+                        code = r.code;
+                        break;
+
+                  case type::list:
+                        l = new L1List<ReturnType>();
+                        for (auto& x : *r.l)
+                              l->insertHead(x);
+                        l->reverse();
+                        break;
+
+                  case type::tree:
+                        tr = new AVLTree<string>();
+                        for (auto& x : *r.tr)
+                              tr->insert(x);
+                        break;
+
+                  case type::boolean:
+                        b = r.b;
+                        break;
+
+                  case type::floatingpoint:
+                        d = r.d;
+                        break;
+
+                  case type::number:
+                        i = r.i;
+                        break;
+
+                  case type::string:
+                        s = new string(*r.s);
+                        break;
+            }
+            t = r.t;
+      }
+
+      ReturnType& operator=(const ReturnType& r) {
+            switch (r.t) {
+                  case type::empty:
+                        break;
+
+                  case type::error:
+                        strcpy(err, r.err);
+                        code = r.code;
+                        break;
+
+                  case type::list:
+                        l = r.l;
+                        break;
+
+                  case type::tree:
+                        tr = r.tr;
+                        break;
+
+                  case type::boolean:
+                        b = r.b;
+                        break;
+
+                  case type::floatingpoint:
+                        d = r.d;
+                        break;
+
+                  case type::number:
+                        i = r.i;
+                        break;
+
+                  case type::string:
+                        s = r.s;
+                        break;
+            }
+            t = r.t;
+            return *this;
+      }
+
+      ReturnType(L1List<ReturnType>* l) {
             t       = type::list;
             this->l = l;
       }
 
-      returnType(AVLTree<string>* tr) {
+      ReturnType(AVLTree<string>* tr) {
             t        = type::tree;
             this->tr = tr;
       }
 
-      returnType(bool b) {
+      ReturnType(bool b) {
             t       = type::boolean;
             this->b = b;
       }
 
-      returnType(double d) {
+      ReturnType(double d) {
             t       = type::floatingpoint;
             this->d = d;
       }
 
-      returnType(int i) {
+      ReturnType(int i) {
             t       = type::number;
             this->i = i;
       }
 
-      returnType(const char* err) {
+      ReturnType(std::string& s) {
+            t       = type::string;
+            this->s = new string(s);
+      }
+
+      ReturnType(int code, const char* err) {
             t = type::error;
             strcpy(this->err, err);
+            this->code = code;
+      }
+
+      friend std::ostream& operator<<(std::ostream& o, const ReturnType& r) {
+            switch (r.t) {
+                  case ReturnType::type::number:
+                        o << r.i;
+                        break;
+
+                  case ReturnType::type::floatingpoint:
+                        o << r.d;
+                        break;
+
+                  case ReturnType::type::string:
+                        o << *r.s;
+                        break;
+
+                  case ReturnType::type::tree:
+                        if (r.tr->isEmpty())
+                              o << " -1";
+                        else
+                              for (auto& x : *r.tr)
+                                    o << " " << x;
+                        break;
+
+                  case ReturnType::type::error:
+                        o << "error code: " << r.code << "\n";
+                        o << "error message:\n\t" << r.err << "\n";
+                        break;
+
+                  default:
+                        break;
+            }
+            return o;
+      }
+
+      ~ReturnType() {
+            switch (t) {
+                  case type::list:
+                        delete l;
+                        l = nullptr;
+                        break;
+
+                  case type::tree:
+                        delete tr;
+                        tr = nullptr;
+                        break;
+
+                  case type::string:
+                        delete s;
+                        s = nullptr;
+                        break;
+
+                  case type::error:
+                        delete[] err;
+                        err = nullptr;
+                        break;
+
+                  default:
+                        break;
+            }
       }
 };
 

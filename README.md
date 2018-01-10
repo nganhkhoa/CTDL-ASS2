@@ -51,11 +51,11 @@ tuân theo quy tắc về số nguyên và số thực ở trên.
 ## 3. Quy ước và yêu cầu
 ### 3.1. Quy ước
 - Phương tiện được xem là đang đứng yên nếu trong hai lần liên tiếp mà
-	tọa độ GPS có độ lệch từ 5m (<= 5m) trở xuống.
+	tọa độ GPS có độ lệch từ 5m (`<= 5m`) trở xuống.
 - Phương tiện được xem là đang kiểm tra nếu trong 5 lần liên tiếp mà
-	độ lệch toạ độ GPS từ 5m trở xuống (< 5m).
+	độ lệch toạ độ GPS từ 5m trở xuống (`<= 5m`).
 - Phương tiện được xem là đang bảo trì nếu trong 20 lần liên tiếp mà
-	độ lệch toạ độ GPS từ 5m trở xuống ($< 5$m).
+	độ lệch toạ độ GPS từ 5m trở xuống (`<= 5m`).
 - Hướng theo kinh độ: vị trí X `(long_X, lat_X)` nằm về
 	phía Đông (East, được kí hiệu bởi kí tự 'E' khi xuất kết quả)
 	so với vị trí Y `(long_Y, lat_Y)` nếu `long_X - long_Y >= 0`
@@ -135,20 +135,17 @@ Các yêu cầu truy xuất có mã và mô tả về việc truy xuất lần l
 	Mã yêu cầu: `6_Along_Alat_M_hhmm`<br/>
 	Trong đó `(Along, Alat)` là tọa độ của trạm A, số lượng phương tiện đang trong
 	trạm là **M**, **hhmm** là thời điểm phương tiện vào trạm A,
-	được tính chính xác đến phút.
-
+	được tính chính xác đến phút.<br/>
 	Nếu trong khoảng thời gian từ trước thời điểm phương tiện vào trạm 15 phút đến lúc
 	vào trạm, trong bán kính 2km tính từ trạm, số lượng phương tiện có mặt trong
 	bán kính đó (được xác định là có ít nhất một vị trí xuất hiện trong bán kính nói trên)
 	nhỏ hơn số lượng phương tiện đang có trong trạm thì toàn bộ các phương tiện
-	được phép vào trạm.
-
+	được phép vào trạm.<br/>
 	Ngược lại, trong thời gian đó, số lượng phương tiện lớn hơn hoặc bằng số lượng
 	phương tiện trong trạm thì chỉ có những phương tiện có khoảng cách tới trạm dưới
 	500m mới được vào trạm, số còn lại không được đi vào trạm. Nếu số phương tiện
 	có khoảng cách tới trạm là 300m chiếm hơn 0.75M thì toàn bộ các phương tiện
-	không được vào trạm do quá tải.
-
+	không được vào trạm do quá tải.<br/>
 	Kết quả của yêu cầu: `<In> - <Out>`<br/>
 	Trong đó `<In>` là danh sách các phương tiện được vào trạm, `<Out>`
 	là danh sách các phương tiện không được vào trạm. Lưu ý thứ tự danh sách được
@@ -159,18 +156,15 @@ Các yêu cầu truy xuất có mã và mô tả về việc truy xuất lần l
 	Mã yêu cầu: `7_Along_Alat_M_R_hhmm` <br/>
 	Trong đó `(Along, Alat)` là tọa độ của trạm quan sát A,
 	số lượng phương tiện trong trạm là **M**, bán kính quan sát là **R**,
-	hhmm là thời điểm phương tiện từ trạm A đi ra, được tính chính xác đến phút.
-
+	hhmm là thời điểm phương tiện từ trạm A đi ra, được tính chính xác đến phút.<br/>
 	Nếu số lượng phương tiện xuất hiện trong bán kính 500m tính từ trạm trong
 	khoảng thời gian từ **hhmm** đến sau đó 30 phút nhỏ hơn 0.7M thì không
 	xảy ra ùn tắc, ngược lại thì sẽ xảy ra ùm tắc. Trong trường hợp xảy ra ùm tắc,
 	75% những phương tiện (ưu tiên các phương tiện có khoảng cách xa hơn)
-	có khoảng cách nằm từ 2km đến 1km tính từ trạm sẽ không mắc kẹt.
-
+	có khoảng cách nằm từ 2km đến 1km tính từ trạm sẽ không mắc kẹt.<br/>
 	Kết quả của yêu cầu: `<S> - <NS>`<br/>
 	Trong đó `<S>` là danh sách các phương tiện bị kẹt (`-1` nếu không có
-	phương tiện nào kẹt),
-    `<NS>` là danh sách các phương tiện không bị kẹt.
+	phương tiện nào kẹt), `<NS>` là danh sách các phương tiện không bị kẹt.
 	Lưu ý thứ tự danh sách được sắp xếp theo ID.
 
 

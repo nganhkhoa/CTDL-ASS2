@@ -17,7 +17,7 @@
  * Docker:
  * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
  *
- * Library use with define so no affect on building online
+ * Libraries are used with define so no affect on building online
  *
  * Libraries used:
  *    Spdlog: https://github.com/gabime/spdlog
@@ -68,28 +68,39 @@ struct VM_Record
             strcpy(id, bus.id);
       }
 
-      char RelativeLatitudeTo(double lat) {
+      bool operator<(const VM_Record& r) {
+            if (timestamp == r.timestamp)
+                  return strcmp(id, r.id) < 0;
+            else
+                  return timestamp < r.timestamp;
+      }
+
+      bool operator==(const VM_Record& r) {
+            return strcmp(id, r.id) == 0 && timestamp == r.timestamp;
+      }
+
+      std::string RelativeLatitudeTo(double lat) {
             if (latitude - lat >= 0)
-                  return 'N';
+                  return "N";
             else
-                  return 'S';
+                  return "S";
       }
-      char RelativeLongitudeTo(double lon) {
+      std::string RelativeLongitudeTo(double lon) {
             if (longitude - lon >= 0)
-                  return 'E';
+                  return "E";
             else
-                  return 'W';
+                  return "W";
       }
-      char RelativeLatitudeTo(const VM_Record& r) {
+      std::string RelativeLatitudeTo(const VM_Record& r) {
             return RelativeLatitudeTo(r.latitude);
       }
-      char RelativeLongitudeTo(const VM_Record& r) {
+      std::string RelativeLongitudeTo(const VM_Record& r) {
             return RelativeLongitudeTo(r.longitude);
       }
-      char RelativeLatitudeTo(double lat, double lon) {
+      std::string RelativeLatitudeTo(double lat, double lon) {
             return RelativeLatitudeTo(lat);
       }
-      char RelativeLongitudeTo(double lat, double lon) {
+      std::string RelativeLongitudeTo(double lat, double lon) {
             return RelativeLongitudeTo(lon);
       }
 
@@ -124,14 +135,14 @@ void releaseVMGlobalData(void* pGData);
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
 
 
-returnType request1(VM_Request&, L1List<VM_Record>&);
-returnType request2();
-returnType request3();
-returnType request4();
-returnType request5();
-returnType request6();
-returnType request7();
-returnType request8();
-returnType request9();
+ReturnType request1(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request2(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request3(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request4(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request5(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
+ReturnType request6(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request7(VM_Request&);
+ReturnType request8(VM_Request&);
+ReturnType request9(VM_Request&);
 
 #endif    // DSA171A2_DBLIB_H
