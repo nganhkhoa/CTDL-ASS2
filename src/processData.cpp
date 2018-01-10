@@ -39,19 +39,24 @@ using namespace std;
 
 
 bool initVMGlobalData(void** pGData) {
-      auto vehicles = new L1List<string>();
+      auto vehicles = new AVLTree<string>();
+      auto records  = new AVLTree<VM_Record>();
       auto rList    = (L1List<VM_Record>*) *pGData;
 
-      rList->traverse(
-         [](VM_Record& vmr, void* v) {
-               auto   vehicles = (L1List<string>*) v;
-               string id(vmr.id);
-               if (vehicles->find(id) == nullptr)
-                     vehicles->insertHead(id);
-         },
-         vehicles);
+      for (auto& vmr : *rList) {
+            string id(vmr.id);
+            vehicles->insert(
+               id, [](string& Old, string& New) { return Old == New; });
 
-      *pGData = vehicles;
+            VM_Record r = vmr;
+            records->insert(r);
+      }
+
+      auto data = new void*[2];
+      data[0]   = vehicles;
+      data[1]   = records;
+
+      *pGData = data;
 
 #ifdef DEBUGGING
       auto console = spdlog::get("console.log");
@@ -60,12 +65,9 @@ bool initVMGlobalData(void** pGData) {
       file->info("{} vehicles", vehicles->getSize());
 
       string str;
-      vehicles->traverse(
-         [](string& s, void* v) {
-               auto str = (string*) v;
-               *str += " " + s;
-         },
-         &str);
+      for (auto& s : *vehicles) {
+            str += " " + s;
+      }
 
       file->info("vehicles:\n{}", str);
 #endif
@@ -74,10 +76,18 @@ bool initVMGlobalData(void** pGData) {
 }
 
 void releaseVMGlobalData(void* pGData) {
-      auto vehicleTree = (AVLTree<string>*) pGData;
-      delete vehicleTree;
-      vehicleTree = nullptr;
-      pGData      = nullptr;
+      auto data     = (void**) pGData;
+      auto vehicles = (AVLTree<string>*) data[0];
+      auto records  = (AVLTree<VM_Record>*) data[1];
+
+      delete vehicles;
+      delete records;
+      delete data;
+
+      vehicles = nullptr;
+      records  = nullptr;
+      data     = nullptr;
+      pGData   = nullptr;
 }
 
 
@@ -97,37 +107,31 @@ bool processRequest(
       file->info("processing request {}", request.code);
 #endif
 
-      auto vehicles = (L1List<string>*) pGData;
+      auto data     = (void**) pGData;
+      auto vehicles = (AVLTree<string>*) data[0];
+      auto records  = (AVLTree<VM_Record>*) data[1];
 
       returnType r;
 
       switch (request.code[0] - '0') {
             case 1:
-                  r = request1(request, recordList);
+                  r = request1(request, *records);
                   break;
             case 2:
-                  r = request2(request, recordList, *vehicles);
                   break;
             case 3:
-                  r = request3(request, recordList, *vehicles);
                   break;
             case 4:
-                  r = request4(request, recordList, *vehicles);
                   break;
             case 5:
-                  r = request5(request, recordList);
                   break;
             case 6:
-                  r = request6();
                   break;
             case 7:
-                  r = request7();
                   break;
             case 8:
-                  r = request8();
                   break;
             case 9:
-                  r = request9();
                   break;
             default:
                   break;
@@ -137,21 +141,25 @@ bool processRequest(
 }
 
 
-returnType request1(VM_Request& request, L1List<VM_Record>& list) {
+returnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
 
-      if (list.isEmpty())
-            return {false};
+      if (records.isEmpty())
+            return {(int) -1};
 
-      auto thisTime = gmtime(&list.at(0).timestamp);
+      auto sample   = *(records.begin());
+      auto thisTime = gmtime(&sample.timestamp);
+
       if (thisTime == nullptr)
             return {"cannot get time from data"};
 
       VM_Record car_1, car_2;
+
+      int req_id;
       if (
          sscanf(    // 1_X_Y_hhmmss
             request.code,
-            "%1lf_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
-            &request.params[0],    // request id
+            "%1d_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
+            &req_id,               // request id
             car_1.id,              // id of vehicle number 1
             car_2.id,              // id of vehicle number 2
             &thisTime->tm_hour,    // hour
@@ -163,123 +171,56 @@ returnType request1(VM_Request& request, L1List<VM_Record>& list) {
       car_1.timestamp = timegm(thisTime);
       car_2.timestamp = timegm(thisTime);
 
-      vector<VM_Record> record;
-      record.push_back(car_1);
-      record.push_back(car_2);
+      VM_Record* ret_1 = nullptr;
+      VM_Record* ret_2 = nullptr;
 
-      try {
-            list.traverse(
-               [](VM_Record& r, void* v) {
-                     auto record = (vector<VM_Record>*) v;
+      records.find(car_1, ret_1);
+      records.find(car_2, ret_2);
 
-                     auto& record_1 = record->at(0);
-                     if (
-                        strcmp(r.id, record_1.id) == 0 &&
-                        r.timestamp == record_1.timestamp) {
-                           record_1 = r;
-                           strcpy(record_1.id, "");
-                     }
+      if (ret_1 == nullptr || ret_2 == nullptr)
+            return {(int) -1};
 
-                     auto& record_2 = record->at(1);
-                     if (
-                        strcmp(r.id, record_2.id) == 0 &&
-                        r.timestamp == record_2.timestamp) {
-                           record_2 = r;
-                           strcpy(record_2.id, "");
-                     }
+      string relative_lat = ret_1->RelativeLatitudeTo(*ret_2);
+      string relative_lon = ret_1->RelativeLongitudeTo(*ret_2);
+      double relative_dis = ret_1->DistanceTo(*ret_2);
 
-                     if (
-                        strcmp(record_1.id, "") == 0 &&
-                        strcmp(record_2.id, "") == 0)
-                           throw true;
-               },
-               &record);
-      } catch (std::exception& e) {
-            // dummy exception
-      } catch (bool& b) {
-            // if both car is found
-            auto ret = new L1List<string>();
+      returnType lat(relative_lat);
+      returnType lon(relative_lon);
+      returnType distance(relative_dis);
 
-            char RelativeLat = record.at(0).RelativeLatitudeTo(record.at(1));
-            char RelativeLon = record.at(0).RelativeLongitudeTo(record.at(1));
+      auto ret = new L1List<returnType>();
+      ret->insertHead(distance);
+      ret->insertHead(lat);
+      ret->insertHead(lon);
 
-            stringstream ss;
-            ss << fixed << setprecision(12)
-               << record.at(0).DistanceTo(record.at(1));
-
-            string distance = ss.str();
-            string lat      = to_string(RelativeLat);
-            string lon      = to_string(RelativeLon);
-
-            ret->push_back(lon);
-            ret->push_back(lat);
-            ret->push_back(distance);
-
-            return {ret};
-      }
-
-      // when one car is not found
-      return {false};
+      return {ret};
 }
-returnType request2(
-   VM_Request&        req,
-   L1List<VM_Record>& list,
-   L1List<string>&    vehicles) {
-      if (list.isEmpty())
+returnType request2(VM_Request& req, AVLTree<VM_Record>& records) {
+      if (records.isEmpty())
             return {false};
 
-      char direction;
-      if (
-         sscanf(
-            req.code,
-            "%1lf_%lf_%1[EW]",
-            &req.params[0],
-            &req.params[1],
-            &direction) != 3)
+      char   direction;
+      int    req_id;
+      double lon;
+      if (sscanf(req.code, "%1d_%lf_%1[EW]", &req_id, &lon, &direction) != 3)
             return {false};
 
-      struct Ans
-      {
-            AVLTree<string> out;
-            double          longitude;
-            char            direction;
-            size_t          num_vehicle;
-      };
-
-      Ans ans;
-      ans.longitude   = req.params[1];
-      ans.direction   = direction;
-      ans.num_vehicle = vehicles.getSize();
-
-      try {
-            list.traverse(
-               [](VM_Record& vmr, void* v) {
-                     Ans* ans = (Ans*) v;
-                     if (
-                        vmr.RelativeLongitudeTo(ans->longitude) !=
-                        ans->direction)
-                           return;
-                     string id(vmr.id);
-
-                     ans->out.insert(
-                        id, [](string& s1, string& s2) { return s1 == s2; });
-
-                     if (ans->num_vehicle == ans->out.getSize()) {
-                           throw true;
-                     }
-               },
-               &ans);
-      } catch (bool& b) {
-            // every vehicles went off track
-            return {(int) 0};
+      AVLTree<string> result;
+      for (auto& x : records) {
+            string relative_lon = x.RelativeLongitudeTo(lon);
+            if (relative_lon[0] != direction) {
+                  string id(x.id);
+                  result.insert(
+                     id, [](string& Old, string& New) { return Old == New; });
+            }
       }
 
-      return {(int) (vehicles.getSize() - ans.out.getSize())};
+      return {(int) result.getSize()};
 }
 returnType request3(
    VM_Request&        req,
    L1List<VM_Record>& list,
-   L1List<string>&    vehicles) {
+   AVLTree<string>&   vehicles) {
       if (list.isEmpty())
             return {false};
 
@@ -293,46 +234,11 @@ returnType request3(
             &direction)        // direction
          != 3)
             return {false};
-
-      struct Ans
-      {
-            AVLTree<string> out;
-            double          latitude;
-            char            direction;
-            size_t          num_vehicle;
-      };
-
-      Ans ans;
-      ans.latitude    = req.params[1];
-      ans.direction   = direction;
-      ans.num_vehicle = vehicles.getSize();
-
-      try {
-            list.traverse(
-               [](VM_Record& vmr, void* v) {
-                     Ans* ans = (Ans*) v;
-                     if (
-                        vmr.RelativeLatitudeTo(ans->latitude) != ans->direction)
-                           return;
-
-                     string id(vmr.id);
-                     ans->out.insert(
-                        id, [](string& s1, string& s2) { return s1 == s2; });
-
-                     if (ans->num_vehicle == ans->out.getSize())
-                           throw true;
-               },
-               &ans);
-      } catch (bool& b) {
-            return {(int) 0};
-      }
-
-      return {(int) (vehicles.getSize() - ans.out.getSize())};
 }
 returnType request4(
    VM_Request&        req,
    L1List<VM_Record>& list,
-   L1List<string>&    vehicles) {
+   AVLTree<string>&   vehicles) {
       if (list.isEmpty())
             return {(int) 0};
 
@@ -355,153 +261,14 @@ returnType request4(
       // time constrain
       if (start >= end)
             return {false};
-
-      struct Ans
-      {
-            VM_Request      req;
-            AVLTree<string> list;
-            size_t          num_vehicle;
-
-            Ans(VM_Request r) : req(r) {}
-      };
-
-      Ans ans(req);
-      ans.num_vehicle = vehicles.getSize();
-
-      try {
-            list.traverse(
-               [](VM_Record& r, void* v) {
-                     auto ans  = (Ans*) v;
-                     auto hour = gmtime(&r.timestamp)->tm_hour;
-
-                     // variables for easy reading
-                     auto& lon    = ans->req.params[1];
-                     auto& lat    = ans->req.params[2];
-                     auto& radius = ans->req.params[3];
-                     auto& start  = ans->req.params[4];
-                     auto& end    = ans->req.params[5];
-
-                     if (start > hour || end < hour)
-                           return;
-
-                     auto distance = r.DistanceTo(lat, lon);
-
-                     if (distance > radius)
-                           return;
-
-                     string id = r.id;
-                     ans->list.insert(
-                        id, [](string& s1, string& s2) { return s1 == s2; });
-
-                     if (ans->num_vehicle == ans->list.getSize())
-                           throw true;
-               },
-               &ans);
-      } catch (bool& b) {
-            // if all vehicles is in the ring between that time
-            return {(int) vehicles.getSize()};
-      }
-
-      return {(int) ans.list.getSize()};
 }
 returnType request5(VM_Request& req, L1List<VM_Record>& list) {
       if (list.isEmpty())
             return {(int) 0};
-
-      struct Ans
-      {
-            char   id[ID_MAX_LENGTH];
-            double lon;
-            double lat;
-            double radius;
-            int    occurence;
-      };
-
-      Ans ans;
-      int req_id;
-
-      if (
-         sscanf(
-            req.code,
-            "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
-            &req_id,        // request id
-            ans.id,         // answer id
-            &ans.lon,       // longitude of station
-            &ans.lat,       // latitude of station
-            &ans.radius)    // radius of station
-         != 5)
-            return {false};
-
-      list.traverse(
-         [](VM_Record& r, void* v) {
-               auto ans = (Ans*) v;
-               if (strcmp(ans->id, r.id) != 0)
-                     return;
-
-               if (r.DistanceTo(ans->lat, ans->lon) <= ans->radius)
-                     ans->occurence++;
-         },
-         &ans);
-
-      return {ans.occurence};
 }
 returnType request6(VM_Request& req, L1List<VM_Record>& list) {
       if (list.isEmpty())
             return {};
-
-      struct param
-      {
-            double lon;
-            double lat;
-            int    car_in;
-            int    hour;
-            int    minute;
-
-            struct pair
-            {
-                  string id;
-                  double distance;
-
-                  bool operator<(const pair& p) {}
-            };
-            // a tree of id and distance relative to lon and lat
-            AVLTree<pair> distance_tree;
-      } param;
-
-      if (
-         sscanf(
-            req.code,
-            "%1d_%lf_%lf_%d_%2d%2d",
-            &req_id,
-            &param.lon,
-            &param.lat,
-            &param.car_in,
-            &param.hour,
-            &param.minute) != 6)
-            return {false};
-
-      list.traverse(
-         [](VM_Record& r, void* v) {
-               auto param = (param*) v;
-               auto t     = gmtime(&r.timestamp);
-               t->hour    = param->hour;
-               t->min     = param->hour;
-
-               if (abs(difftime(t, timestamp)) >= 15 * 60)
-                     return;
-
-               auto distance = r.DistanceTo(param->lat, param->lon);
-
-               if (distance > 2)
-                     return;
-
-               param::pair p;
-               p.id       = r.id;
-               p.distance = distance;
-
-               param->distance_tree.insert(p);
-         },
-         &param)
 }
 returnType request7() {
       return {false};
@@ -518,35 +285,36 @@ bool print(returnType& r, VM_Request& req) {
       switch (r.t) {
             case returnType::type::empty:
                   return false;
+
             case returnType::type::boolean:
                   cout << req.code << ": -1\n";
                   return false;
 
+            case returnType::type::error:
+                  cout << r;
+                  return false;
+
             case returnType::type::list:
                   cout << req.code << ":";
+
                   if (r.l->isEmpty())
                         cout << " -1";
+
+                  else if (req.code[0] == 1)
+                        for (auto& x : *r.l)
+                              cout << " " << x;
+
                   else
-                        r.l->traverse([](string& s) { cout << " " << s; });
+                        // list of tree id
+                        for (auto& x : *r.l)
+                              cout << x << " -";
+
                   cout << "\n";
-                  delete r.l;
-                  r.l = nullptr;
                   return true;
 
-            case returnType::type::tree:
-                  return true;
-
-            case returnType::type::floatingpoint:
-                  cout << req.code << ": " << fixed << setprecision(12) << r.d
-                       << "\n";
-                  return true;
-
-            case returnType::type::number:
-                  cout << req.code << ": " << r.i << "\n";
-                  return true;
 
             default:
-                  // we should not get here
-                  return false;
+                  cout << req.code << ": " << r << "\n";
+                  return true;
       };
 }
