@@ -14,7 +14,11 @@
 
 # files auto fix of vscode
 .vscode/.cmaketools.json
+.vscode/last.sql
 
+# ignore vim swap files
+*/*.swp
+/*.swp
 
 # exception
 !cppcheck.log

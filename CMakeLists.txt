@@ -5,7 +5,10 @@ set(OTHER_FILES_EXTENSION "")
 
 set (PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-      add_definitions(-DCMAKED)
+      if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+            message("Add define DEBUGGING")
+            add_definitions(-DDEBUGGING)
+      endif()
 
       # config here
       set(PROJECT_NAME "dsa171a2")
@@ -47,9 +50,24 @@ set(MULTITHREAD "-pthread")
 
 set(CXX_DEFINES "-DAVL_USE_HEIGHT")
 
-set(CMAKE_CXX_FLAGS ${WARNING}\ ${PUBLIC}\ ${IDENTIFIER}\ ${CPPVERSION}\ ${MULTITHREAD}\ ${CXX_DEFINES})
+set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} \
+      ${WARNING} \
+      ${IDENTIFIER} \
+      ${CPPVERSION} \
+      ${MULTITHREAD} \
+      ${CXX_DEFINES}"
+)
+
 
 add_subdirectory("src")
+
+if (UNIT_TEST)
+message("Add define UNIT_TEST")
+add_definitions(-DUNIT_TEST)
+add_subdirectory("include/googletest/googletest")
+add_subdirectory("test")
+endif()
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 # using Intel C++

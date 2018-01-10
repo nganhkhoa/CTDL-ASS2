@@ -9,6 +9,22 @@
  * management
  * =========================================================================================
  */
+/**
+ * This is done by nguyen anh khoa - 1611617
+ *
+ * Github repository will be public after online judge closes
+ * Github: https://github.com/nganhkhoa/CTDL-ASS2.git
+ * Docker:
+ * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
+ *
+ * Libraries are used with define so no affect on building online
+ *
+ * Libraries used:
+ *    Spdlog: https://github.com/gabime/spdlog
+ *    Googletest: https://github.com/google/googletest
+ *
+ * This is only in case teacher want to interview me
+ */
 
 #ifndef DSA171A2_DBLIB_H
 #define DSA171A2_DBLIB_H
@@ -37,40 +53,54 @@ struct VM_Record
 
       // default constructor
       VM_Record() {
-            id[0] = 0;
+            id[0]     = 0;
+            timestamp = 0;
+            longitude = 0;
+            latitude  = 0;
       }
       VM_Record(const char* busID) {
             strcpy(id, busID);
       }
       // copy constructor
-      VM_Record(VM_Record& bus)
+      VM_Record(const VM_Record& bus)
           : timestamp(bus.timestamp), longitude(bus.longitude),
             latitude(bus.latitude) {
             strcpy(id, bus.id);
       }
 
-      char RelativeLatitudeTo(double lat) {
+      bool operator<(const VM_Record& r) {
+            if (timestamp == r.timestamp)
+                  return strcmp(id, r.id) < 0;
+            else
+                  return timestamp < r.timestamp;
+      }
+
+      bool operator==(const VM_Record& r) {
+            return strcmp(id, r.id) == 0 && timestamp == r.timestamp;
+      }
+
+      std::string RelativeLatitudeTo(double lat) {
             if (latitude - lat >= 0)
-                  return 'N';
+                  return "N";
             else
-                  return 'S';
+                  return "S";
       }
-      char RelativeLongitudeTo(double lon) {
+      std::string RelativeLongitudeTo(double lon) {
             if (longitude - lon >= 0)
-                  return 'E';
+                  return "E";
             else
-                  return 'W';
+                  return "W";
       }
-      char RelativeLatitudeTo(const VM_Record& r) {
+      std::string RelativeLatitudeTo(const VM_Record& r) {
             return RelativeLatitudeTo(r.latitude);
       }
-      char RelativeLongitudeTo(const VM_Record& r) {
+      std::string RelativeLongitudeTo(const VM_Record& r) {
             return RelativeLongitudeTo(r.longitude);
       }
-      char RelativeLatitudeTo(double lat, double lon) {
+      std::string RelativeLatitudeTo(double lat, double lon) {
             return RelativeLatitudeTo(lat);
       }
-      char RelativeLongitudeTo(double lat, double lon) {
+      std::string RelativeLongitudeTo(double lat, double lon) {
             return RelativeLongitudeTo(lon);
       }
 
@@ -103,5 +133,16 @@ bool initVMGlobalData(void** pGData);
 void releaseVMGlobalData(void* pGData);
 
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
+
+
+ReturnType request1(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request2(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request3(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request4(VM_Request&, AVLTree<VM_Record>&, const size_t&);
+ReturnType request5(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
+ReturnType request6(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request7(VM_Request&);
+ReturnType request8(VM_Request&);
+ReturnType request9(VM_Request&);
 
 #endif    // DSA171A2_DBLIB_H

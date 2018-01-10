@@ -9,6 +9,22 @@
  * management
  * =========================================================================================
  */
+/**
+ * This is done by nguyen anh khoa - 1611617
+ *
+ * Github repository will be public after online judge closes
+ * Github: https://github.com/nganhkhoa/CTDL-ASS2.git
+ * Docker:
+ * https://cloud.docker.com/swarm/luibo/repository/docker/luibo/ctdl-ass2/general
+ *
+ * Libraries are used with define so no affect on building online
+ *
+ * Libraries used:
+ *    Spdlog: https://github.com/gabime/spdlog
+ *    Googletest: https://github.com/google/googletest
+ *
+ * This is only in case teacher want to interview me
+ */
 
 #include <dbLib.h>
 
@@ -21,7 +37,7 @@
 #define __PI 3.14159265358979323846
 #define earthRadiusKm 6371.0
 
-#if !defined NDEBUG && defined CMAKED
+#ifdef DEBUGGING
 #include <spdlog/spdlog.h>
 #endif
 
