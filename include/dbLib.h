@@ -68,28 +68,39 @@ struct VM_Record
             strcpy(id, bus.id);
       }
 
-      char RelativeLatitudeTo(double lat) {
+      bool operator<(const VM_Record& r) {
+            if (timestamp == r.timestamp)
+                  return strcmp(id, r.id) < 0;
+            else
+                  return timestamp < r.timestamp;
+      }
+
+      bool operator==(const VM_Record& r) {
+            return strcmp(id, r.id) == 0 && timestamp == r.timestamp;
+      }
+
+      std::string RelativeLatitudeTo(double lat) {
             if (latitude - lat >= 0)
-                  return 'N';
+                  return "N";
             else
-                  return 'S';
+                  return "S";
       }
-      char RelativeLongitudeTo(double lon) {
+      std::string RelativeLongitudeTo(double lon) {
             if (longitude - lon >= 0)
-                  return 'E';
+                  return "E";
             else
-                  return 'W';
+                  return "W";
       }
-      char RelativeLatitudeTo(const VM_Record& r) {
+      std::string RelativeLatitudeTo(const VM_Record& r) {
             return RelativeLatitudeTo(r.latitude);
       }
-      char RelativeLongitudeTo(const VM_Record& r) {
+      std::string RelativeLongitudeTo(const VM_Record& r) {
             return RelativeLongitudeTo(r.longitude);
       }
-      char RelativeLatitudeTo(double lat, double lon) {
+      std::string RelativeLatitudeTo(double lat, double lon) {
             return RelativeLatitudeTo(lat);
       }
-      char RelativeLongitudeTo(double lat, double lon) {
+      std::string RelativeLongitudeTo(double lat, double lon) {
             return RelativeLongitudeTo(lon);
       }
 
@@ -124,12 +135,12 @@ void releaseVMGlobalData(void* pGData);
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& recordList);
 
 
-returnType request1(VM_Request&, L1List<VM_Record>&);
-returnType request2(VM_Request&, L1List<VM_Record>&, L1List<string>&);
-returnType request3(VM_Request&, L1List<VM_Record>&, L1List<string>&);
-returnType request4(VM_Request&, L1List<VM_Record>&, L1List<string>&);
+returnType request1(VM_Request&, AVLTree<VM_Record>&);
+returnType request2(VM_Request&, L1List<VM_Record>&, AVLTree<string>&);
+returnType request3(VM_Request&, L1List<VM_Record>&, AVLTree<string>&);
+returnType request4(VM_Request&, L1List<VM_Record>&, AVLTree<string>&);
 returnType request5(VM_Request&, L1List<VM_Record>&);
-returnType request6();
+returnType request6(VM_Request&, L1List<VM_Record>&);
 returnType request7();
 returnType request8();
 returnType request9();
