@@ -372,7 +372,89 @@ ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
             return {ret};
       }
 
-      return {false};
+      int    req_id;
+      double lon;
+      double lat;
+      int    vehicles_inside;
+      int    hour;
+      int    minute;
+
+      if (
+         sscanf(
+            req.code,
+            "%1d_%lf_%lf_%d_%2d%2d",
+            &req_id,
+            &lon,
+            &lat,
+            &vehicles_inside,
+            &hour,
+            &minute) != 6)
+            return {false};
+
+      auto under_2km  = new AVLTree<string>();
+      auto under_300m = new AVLTree<string>();
+      auto over_500m  = new AVLTree<string>();
+      auto under_500m = new AVLTree<string>();
+
+      for (auto& r : records) {
+            auto open_time_tm     = gmtime(&r.timestamp);
+            open_time_tm->tm_hour = hour;
+            open_time_tm->tm_min  = minute;
+
+            auto open_time = timegm(open_time_tm);
+
+            if (r.timestamp < open_time)
+                  break;
+
+            if (r.timestamp - open_time > 60 * 15)
+                  continue;
+
+            auto distance = r.DistanceTo(lat, lon);
+
+            string id(r.id);
+            auto   cmp = [](string& Old, string& New) { return Old == New; };
+
+            if (distance < 300) {
+                  under_2km->insert(id, cmp);
+                  under_300m->insert(id, cmp);
+                  under_500m->insert(id, cmp);
+            }
+
+            else if (distance < 500) {
+                  under_500m->insert(id, cmp);
+                  under_2km->insert(id, cmp);
+            }
+
+            else if (distance < 2000) {
+                  over_500m->insert(id, cmp);
+                  under_2km->insert(id, cmp);
+            }
+
+            else {
+                  continue;
+            }
+      }
+
+      auto out  = new AVLTree<string>();
+      auto in   = new AVLTree<string>();
+      auto list = new L1List<ReturnType*>();
+
+      // again, what is "in" and "out"
+      // is that only the vehicles in 15' prior to the time
+      // or all vehicles
+      if ((int) under_2km->getSize() < vehicles_inside) {
+            // all in
+      }
+      else if ((int) under_300m->getSize() >= 0.75 * vehicles_inside) {
+            // all out
+      }
+      else {
+            // under 500 is in
+            // over 500 is out
+      }
+
+      // don't forget to delete data unused
+      return {list};
 }
 ReturnType request7(VM_Request& req) {
       return {false};
