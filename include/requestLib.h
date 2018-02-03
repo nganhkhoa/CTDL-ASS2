@@ -112,14 +112,14 @@ struct ReturnType
             number,
             string
       };
-      union {                          // 4 bytes
-            L1List<ReturnType>* l;     // 4 bytes
-            AVLTree<string>*    tr;    // 4 bytes
-            bool                b;     // 2 bytes
-            double              d;     // 4 bytes
-            int                 i;     // 4 bytes
-            std::string*        s;
-            char*               err;    // 4 bytes
+      union {                            // 4 bytes
+            L1List<ReturnType*>* l;      // 4 bytes
+            AVLTree<string>*     tr;     // 4 bytes
+            bool                 b;      // 2 bytes
+            double               d;      // 4 bytes
+            int                  i;      // 4 bytes
+            std::string*         s;      // 4 bytes
+            char*                err;    // 4 bytes
       };
       type t;
       int  code;    // error code
@@ -128,6 +128,7 @@ struct ReturnType
             t = type::empty;
       }
 
+      /*
       ReturnType(const ReturnType& r) {
             switch (r.t) {
                   case type::empty:
@@ -139,7 +140,7 @@ struct ReturnType
                         break;
 
                   case type::list:
-                        l = new L1List<ReturnType>();
+                        l = new L1List<ReturnType*>();
                         for (auto& x : *r.l)
                               l->insertHead(x);
                         l->reverse();
@@ -169,6 +170,7 @@ struct ReturnType
             }
             t = r.t;
       }
+      //*/
 
       ReturnType& operator=(const ReturnType& r) {
             switch (r.t) {
@@ -208,7 +210,7 @@ struct ReturnType
             return *this;
       }
 
-      ReturnType(L1List<ReturnType>* l) {
+      ReturnType(L1List<ReturnType*>* l) {
             t       = type::list;
             this->l = l;
       }
@@ -280,6 +282,11 @@ struct ReturnType
       ~ReturnType() {
             switch (t) {
                   case type::list:
+                        for (auto& x : *l) {
+                              // because the value stored is a pointer
+                              delete x;
+                              x = nullptr;
+                        }
                         delete l;
                         l = nullptr;
                         break;
