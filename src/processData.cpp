@@ -46,7 +46,7 @@ bool initVMGlobalData(void** pGData) {
       for (auto& vmr : *rList) {
             string id(vmr.id);
             vehicles->insert(
-               id, [](string& Old, string& New) { return Old == New; });
+                  id, [](string& Old, string& New) { return Old == New; });
 
             VM_Record r = vmr;
             records->insert(r);
@@ -94,9 +94,9 @@ void releaseVMGlobalData(void* pGData) {
 bool print(ReturnType&, VM_Request&);
 
 bool processRequest(
-   VM_Request&        request,
-   L1List<VM_Record>& recordList,
-   void*              pGData) {
+      VM_Request&        request,
+      L1List<VM_Record>& recordList,
+      void*              pGData) {
 // TODO: Your code goes here
 // return false for invlaid events
 
@@ -165,17 +165,16 @@ ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
       VM_Record car_1, car_2;
 
       int req_id;
-      if (
-         sscanf(    // 1_X_Y_hhmmss
-            request.code,
-            "%1d_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
-            &req_id,               // request id
-            car_1.id,              // id of vehicle number 1
-            car_2.id,              // id of vehicle number 2
-            &thisTime->tm_hour,    // hour
-            &thisTime->tm_min,     // minute
-            &thisTime->tm_sec)     // second
-         != 6)
+      if (sscanf(    // 1_X_Y_hhmmss
+                request.code,
+                "%1d_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
+                &req_id,               // request id
+                car_1.id,              // id of vehicle number 1
+                car_2.id,              // id of vehicle number 2
+                &thisTime->tm_hour,    // hour
+                &thisTime->tm_min,     // minute
+                &thisTime->tm_sec)     // second
+          != 6)
             return {false};
 
       car_1.timestamp = timegm(thisTime);
@@ -194,11 +193,11 @@ ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
       string relative_lon = ret_1->RelativeLongitudeTo(*ret_2);
       double relative_dis = ret_1->DistanceTo(*ret_2);
 
-      ReturnType lat(relative_lat);
-      ReturnType lon(relative_lon);
-      ReturnType distance(relative_dis);
+      ReturnType* lat      = new ReturnType(relative_lat);
+      ReturnType* lon      = new ReturnType(relative_lon);
+      ReturnType* distance = new ReturnType(relative_dis);
 
-      auto ret = new L1List<ReturnType>();
+      auto ret = new L1List<ReturnType*>();
       ret->insertHead(distance);
       ret->insertHead(lat);
       ret->insertHead(lon);
@@ -207,9 +206,9 @@ ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
 }
 
 ReturnType request2(
-   VM_Request&         req,
-   AVLTree<VM_Record>& records,
-   const size_t&       vehicles_size) {
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      const size_t&       vehicles_size) {
 
       if (records.isEmpty())
             return {(int) 0};
@@ -225,8 +224,9 @@ ReturnType request2(
             string relative_lon = x.RelativeLongitudeTo(lon);
             if (relative_lon[0] != direction) {
                   string id(x.id);
-                  result.insert(
-                     id, [](string& Old, string& New) { return Old == New; });
+                  result.insert(id, [](string& Old, string& New) {
+                        return Old == New;
+                  });
 
                   if (result.getSize() == vehicles_size)
                         break;
@@ -237,9 +237,9 @@ ReturnType request2(
 }
 
 ReturnType request3(
-   VM_Request&         req,
-   AVLTree<VM_Record>& records,
-   const size_t&       vehicles_size) {
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      const size_t&       vehicles_size) {
 
       if (records.isEmpty())
             return {(int) 0};
@@ -255,8 +255,9 @@ ReturnType request3(
             string relative_lat = x.RelativeLatitudeTo(lat);
             if (relative_lat[0] != direction) {
                   string id(x.id);
-                  result.insert(
-                     id, [](string& Old, string& New) { return Old == New; });
+                  result.insert(id, [](string& Old, string& New) {
+                        return Old == New;
+                  });
 
                   if (result.getSize() == vehicles_size)
                         break;
@@ -267,9 +268,9 @@ ReturnType request3(
 }
 
 ReturnType request4(
-   VM_Request&         req,
-   AVLTree<VM_Record>& records,
-   const size_t&       vehicles_size) {
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      const size_t&       vehicles_size) {
 
       if (records.isEmpty())
             return {(int) 0};
@@ -281,48 +282,58 @@ ReturnType request4(
       int    start;
       int    end;
 
-      if (
-         sscanf(
-            req.code,
-            "%1d_%lf_%lf_%lf_%d_%d",
-            &req_id,
-            &lon,
-            &lat,
-            &radius,
-            &start,
-            &end) != 6)
+      if (sscanf(
+                req.code,
+                "%1d_%lf_%lf_%lf_%d_%d",
+                &req_id,
+                &lon,
+                &lat,
+                &radius,
+                &start,
+                &end) != 6)
             return {false};
 
       AVLTree<string> result;
-      for (auto& x : records) {
-            int hour = gmtime(&x.timestamp)->tm_hour;
+      for (auto& r : records) {
+            int hour = gmtime(&r.timestamp)->tm_hour;
             if (hour < start)
                   continue;
 
-            if (hour > end)
+            if (hour >= end)
                   // our tree is build with time order
-                  // if time is bigger then we need
+                  // if time is bigger then we need a
                   break;
 
-            double distance = x.DistanceTo(lat, lon);
+            double distance = r.DistanceTo(lat, lon);
 
             if (distance <= radius) {
-                  string id(x.id);
-                  result.insert(
-                     id, [](string& Old, string& New) { return Old == New; });
+                  string id(r.id);
+                  result.insert(id, [](string& Old, string& New) {
+                        return Old == New;
+                  });
 
                   if (result.getSize() == vehicles_size)
                         break;
             }
       }
+#ifdef DEBUGGING
+      auto file = spdlog::get("file.log");
+      file->info("Request 4: {} vehicles", result.getSize());
 
+      string str;
+      for (auto& s : result) {
+            str += " " + s;
+      }
+
+      file->info("vehicles:\n{}", str);
+#endif
       return {(int) result.getSize()};
 }
 
 ReturnType request5(
-   VM_Request&         req,
-   AVLTree<VM_Record>& records,
-   AVLTree<string>&    vehicles) {
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      AVLTree<string>&    vehicles) {
 
       if (records.isEmpty())
             return {(int) 0};
@@ -333,15 +344,14 @@ ReturnType request5(
       double lon;
       double radius;
 
-      if (
-         sscanf(
-            req.code,
-            "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
-            &req_id,
-            char_id,
-            &lon,
-            &lat,
-            &radius) != 5)
+      if (sscanf(
+                req.code,
+                "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
+                &req_id,
+                char_id,
+                &lon,
+                &lat,
+                &radius) != 5)
             return {false};
 
       string  id(char_id);
@@ -354,11 +364,11 @@ ReturnType request5(
 
 
       int occurence = 0;
-      for (auto& x : records) {
-            if (strcmp(x.id, char_id) != 0)
+      for (auto& r : records) {
+            if (strcmp(r.id, char_id) != 0)
                   continue;
 
-            double distance = x.DistanceTo(lat, lon);
+            double distance = r.DistanceTo(lat, lon);
 
             if (distance <= radius)
                   occurence++;
@@ -372,7 +382,88 @@ ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
             return {ret};
       }
 
-      return {false};
+      int    req_id;
+      double lon;
+      double lat;
+      int    vehicles_inside;
+      int    hour;
+      int    minute;
+
+      if (sscanf(
+                req.code,
+                "%1d_%lf_%lf_%d_%2d%2d",
+                &req_id,
+                &lon,
+                &lat,
+                &vehicles_inside,
+                &hour,
+                &minute) != 6)
+            return {false};
+
+      auto under_2km  = new AVLTree<string>();
+      auto under_300m = new AVLTree<string>();
+      auto over_500m  = new AVLTree<string>();
+      auto under_500m = new AVLTree<string>();
+
+      for (auto& r : records) {
+            auto open_time_tm     = gmtime(&r.timestamp);
+            open_time_tm->tm_hour = hour;
+            open_time_tm->tm_min  = minute;
+
+            auto open_time = timegm(open_time_tm);
+
+            if (r.timestamp < open_time)
+                  break;
+
+            if (r.timestamp - open_time > 60 * 15)
+                  continue;
+
+            auto distance = r.DistanceTo(lat, lon);
+
+            string id(r.id);
+            auto   cmp = [](string& Old, string& New) { return Old == New; };
+
+            if (distance < 300) {
+                  under_2km->insert(id, cmp);
+                  under_300m->insert(id, cmp);
+                  under_500m->insert(id, cmp);
+            }
+
+            else if (distance < 500) {
+                  under_500m->insert(id, cmp);
+                  under_2km->insert(id, cmp);
+            }
+
+            else if (distance < 2000) {
+                  over_500m->insert(id, cmp);
+                  under_2km->insert(id, cmp);
+            }
+
+            else {
+                  continue;
+            }
+      }
+
+      auto out  = new AVLTree<string>();
+      auto in   = new AVLTree<string>();
+      auto list = new L1List<ReturnType*>();
+
+      // again, what is "in" and "out"
+      // is that only the vehicles in 15' prior to the time
+      // or all vehicles
+      if ((int) under_2km->getSize() < vehicles_inside) {
+            // all in
+      }
+      else if ((int) under_300m->getSize() >= 0.75 * vehicles_inside) {
+            // all out
+      }
+      else {
+            // under 500 is in
+            // over 500 is out
+      }
+
+      // don't forget to delete data unused
+      return {list};
 }
 ReturnType request7(VM_Request& req) {
       return {false};
@@ -398,7 +489,7 @@ bool print(ReturnType& r, VM_Request& req) {
                   return false;
 
             case ReturnType::type::list:
-                  cout << req.code << ":";
+                  cout << req.code[0] << ":";
 
                   if (r.l->isEmpty())
                         cout << " -1";
@@ -419,7 +510,7 @@ bool print(ReturnType& r, VM_Request& req) {
 
 
             default:
-                  cout << req.code << ": " << r << "\n";
+                  cout << req.code[0] << ": " << r << "\n";
                   return true;
       }
 

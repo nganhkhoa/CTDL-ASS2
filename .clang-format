@@ -3,7 +3,7 @@
 #Require Clang 4.0
 
 #BasedOnStyle: LLVM
-ContinuationIndentWidth: 3
+ContinuationIndentWidth: 6
 IndentWidth: 6
 MaxEmptyLinesToKeep: 2
 #TabWidth: 4

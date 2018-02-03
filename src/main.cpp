@@ -22,9 +22,10 @@ void initLoggers() {
             time_t     t  = time(nullptr);
             struct tm* lt = std::localtime(&t);
             string     file_name =
-               to_string(lt->tm_year + 1900) + "-" + to_string(lt->tm_mon + 1) +
-               "-" + to_string(lt->tm_mday) + " " + to_string(lt->tm_hour) +
-               ":" + to_string(lt->tm_min) + ":" + to_string(lt->tm_sec);
+                  to_string(lt->tm_year + 1900) + "-" +
+                  to_string(lt->tm_mon + 1) + "-" + to_string(lt->tm_mday) +
+                  " " + to_string(lt->tm_hour) + ":" + to_string(lt->tm_min) +
+                  ":" + to_string(lt->tm_sec);
             file_name = "logs/" + file_name + ".log";
             // create log file with name as run time
             auto file = spdlog::basic_logger_mt("file.log", file_name);
@@ -48,9 +49,9 @@ void display(L1List<VM_Record>& bList) {
 
 int main(int narg, char** argv) {
 #ifdef _WIN32
-      system("cls");
+// system("cls");
 #elif __unix
-      system("clear");
+// system("clear");
 #endif
 
 #ifdef DEBUGGING
@@ -80,13 +81,13 @@ int main(int narg, char** argv) {
 
 #ifdef DEBUGGING
       console->info(
-         "Begin processing {} events with {} records",
-         requestList.getSize(),
-         db.getSize());
+            "Begin processing {} events with {} records",
+            requestList.getSize(),
+            db.getSize());
       file->info(
-         "Begin processing {} events with {} records",
-         requestList.getSize(),
-         db.getSize());
+            "Begin processing {} events with {} records",
+            requestList.getSize(),
+            db.getSize());
 #endif
       process(requestList, db);
 

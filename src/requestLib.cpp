@@ -36,13 +36,19 @@ void loadRequests(char* fName, L1List<VM_Request>& rList) {
       ifstream inFile(fName);
 
       if (!inFile) {
-            cout << "The file is not found!";
+            cout << "The file is not found!\n";
             return;
       }
 
       string line;
       bool   end;
       while (getline(inFile, line, ' ')) {
+
+            if (line[line.length() - 1] == '\n')
+                  line.erase(line.length() - 1);
+            if (line[line.length() - 1] == '\r')
+                  line.erase(line.length() - 1);
+
             if (line[line.length() - 1] == ';') {
                   line.erase(line.length() - 1);
                   end = true;
