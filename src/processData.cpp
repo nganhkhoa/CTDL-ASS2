@@ -220,10 +220,10 @@ ReturnType request2(
             return {false};
 
       AVLTree<string> result;
-      for (auto& x : records) {
-            string relative_lon = x.RelativeLongitudeTo(lon);
+      for (auto& r : records) {
+            string relative_lon = r.RelativeLongitudeTo(lon);
             if (relative_lon[0] != direction) {
-                  string id(x.id);
+                  string id(r.id);
                   result.insert(id, [](string& Old, string& New) {
                         return Old == New;
                   });
@@ -233,7 +233,7 @@ ReturnType request2(
             }
       }
 
-      return {(int) result.getSize()};
+      return {(int) (vehicles_size - result.getSize())};
 }
 
 ReturnType request3(
@@ -251,10 +251,10 @@ ReturnType request3(
             return {false};
 
       AVLTree<string> result;
-      for (auto& x : records) {
-            string relative_lat = x.RelativeLatitudeTo(lat);
+      for (auto& r : records) {
+            string relative_lat = r.RelativeLatitudeTo(lat);
             if (relative_lat[0] != direction) {
-                  string id(x.id);
+                  string id(r.id);
                   result.insert(id, [](string& Old, string& New) {
                         return Old == New;
                   });
@@ -264,7 +264,7 @@ ReturnType request3(
             }
       }
 
-      return {(int) result.getSize()};
+      return {(int) (vehicles_size - result.getSize())};
 }
 
 ReturnType request4(
