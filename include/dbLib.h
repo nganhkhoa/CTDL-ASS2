@@ -141,8 +141,8 @@ ReturnType request3(VM_Request&, AVLTree<VM_Record>&, const size_t&);
 ReturnType request4(VM_Request&, AVLTree<VM_Record>&, const size_t&);
 ReturnType request5(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
 ReturnType request6(VM_Request&, AVLTree<VM_Record>&);
-ReturnType request7(VM_Request&);
-ReturnType request8(VM_Request&);
-ReturnType request9(VM_Request&);
+ReturnType request7(VM_Request&, AVLTree<VM_Record>&);
+ReturnType request8(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
+ReturnType request9(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
 
 #endif    // DSA171A2_DBLIB_H

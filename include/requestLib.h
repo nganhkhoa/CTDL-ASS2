@@ -257,11 +257,14 @@ struct ReturnType
                         break;
 
                   case ReturnType::type::string:
-                        o << *r.s;
+                        if (r.s != nullptr)
+                              o << *r.s;
                         break;
 
                   case ReturnType::type::tree:
-                        if (r.tr->isEmpty())
+                        if (r.tr == nullptr)
+                              o << "-1";
+                        else if (r.tr->isEmpty())
                               o << " -1";
                         else
                               for (auto& x : *r.tr)
@@ -279,9 +282,26 @@ struct ReturnType
             return o;
       }
 
+      void printTreeWithRestriction(AVLTree<string>& restriction) {
+            if (tr == nullptr)
+                  return;
+            else if (tr->isEmpty())
+                  return;
+            else {
+                  string* ret = nullptr;
+                  for (auto& x : *tr) {
+                        if (restriction.find(x, ret))
+                              continue;
+                        cout << " " << x;
+                  }
+            }
+      }
+
       ~ReturnType() {
             switch (t) {
                   case type::list:
+                        if (l == nullptr)
+                              break;
                         for (auto& x : *l) {
                               // because the value stored is a pointer
                               delete x;
@@ -292,17 +312,20 @@ struct ReturnType
                         break;
 
                   case type::tree:
-                        delete tr;
+                        if (tr)
+                              delete tr;
                         tr = nullptr;
                         break;
 
                   case type::string:
-                        delete s;
+                        if (s)
+                              delete s;
                         s = nullptr;
                         break;
 
                   case type::error:
-                        delete[] err;
+                        if (err)
+                              delete[] err;
                         err = nullptr;
                         break;
 

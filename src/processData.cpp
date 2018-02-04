@@ -39,9 +39,10 @@ using namespace std;
 
 
 bool initVMGlobalData(void** pGData) {
-      auto vehicles = new AVLTree<string>();
-      auto records  = new AVLTree<VM_Record>();
-      auto rList    = (L1List<VM_Record>*) *pGData;
+      auto vehicles    = new AVLTree<string>();
+      auto records     = new AVLTree<VM_Record>();
+      auto restriction = new AVLTree<VM_Record>();
+      auto rList       = (L1List<VM_Record>*) *pGData;
 
       for (auto& vmr : *rList) {
             string id(vmr.id);
@@ -52,9 +53,10 @@ bool initVMGlobalData(void** pGData) {
             records->insert(r);
       }
 
-      auto data = new void*[2];
+      auto data = new void*[3];
       data[0]   = vehicles;
       data[1]   = records;
+      data[2]   = restriction;
 
       *pGData = data;
 
@@ -76,22 +78,25 @@ bool initVMGlobalData(void** pGData) {
 }
 
 void releaseVMGlobalData(void* pGData) {
-      auto data     = (void**) pGData;
-      auto vehicles = (AVLTree<string>*) data[0];
-      auto records  = (AVLTree<VM_Record>*) data[1];
+      auto data        = (void**) pGData;
+      auto vehicles    = (AVLTree<string>*) data[0];
+      auto records     = (AVLTree<VM_Record>*) data[1];
+      auto restriction = (AVLTree<string>*) data[2];
 
+      delete restriction;
       delete vehicles;
       delete records;
       delete data;
 
-      vehicles = nullptr;
-      records  = nullptr;
-      data     = nullptr;
-      pGData   = nullptr;
+      restriction = nullptr;
+      vehicles    = nullptr;
+      records     = nullptr;
+      data        = nullptr;
+      pGData      = nullptr;
 }
 
 
-bool print(ReturnType&, VM_Request&);
+bool print(ReturnType&, VM_Request&, AVLTree<string>&);
 
 bool processRequest(
       VM_Request&        request,
@@ -107,9 +112,10 @@ bool processRequest(
       file->info("processing request {}", request.code);
 #endif
 
-      auto data     = (void**) pGData;
-      auto vehicles = (AVLTree<string>*) data[0];
-      auto records  = (AVLTree<VM_Record>*) data[1];
+      auto data        = (void**) pGData;
+      auto vehicles    = (AVLTree<string>*) data[0];
+      auto records     = (AVLTree<VM_Record>*) data[1];
+      auto restriction = (AVLTree<string>*) data[2];
 
       size_t vehicles_size = vehicles->getSize();
 
@@ -135,19 +141,19 @@ bool processRequest(
                   r = request6(request, *records);
                   break;
             case 7:
-                  r = request7(request);
+                  r = request7(request, *records);
                   break;
             case 8:
-                  r = request8(request);
+                  r = request8(request, *records, *restriction);
                   break;
             case 9:
-                  r = request9(request);
+                  r = request9(request, *records, *restriction);
                   break;
             default:
                   break;
       }
 
-      return print(r, request);
+      return print(r, request, *restriction);
 }
 
 
@@ -412,18 +418,18 @@ ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
             string id(r.id);
             auto   cmp = [](string& Old, string& New) { return Old == New; };
 
-            if (distance < 300) {
-                  under_2km->insert(id, cmp);
+            if (distance < 0.3) {
                   under_300m->insert(id, cmp);
                   under_500m->insert(id, cmp);
+                  under_2km->insert(id, cmp);
             }
 
-            else if (distance < 500) {
+            else if (distance < 0.5) {
                   under_500m->insert(id, cmp);
                   under_2km->insert(id, cmp);
             }
 
-            else if (distance < 2000) {
+            else if (distance < 2) {
                   over_500m->insert(id, cmp);
                   under_2km->insert(id, cmp);
             }
@@ -433,39 +439,66 @@ ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
             }
       }
 
-      auto out  = new AVLTree<string>();
-      auto in   = new AVLTree<string>();
-      auto list = new L1List<ReturnType*>();
+      AVLTree<string>* out  = nullptr;
+      AVLTree<string>* in   = nullptr;
+      auto             list = new L1List<ReturnType*>();
 
       // again, what is "in" and "out"
       // is that only the vehicles in 15' prior to the time
       // or all vehicles
+      // i have a confirm on that it is only 2km below
       if ((int) under_2km->getSize() < vehicles_inside) {
             // all in
+            in  = under_2km;
+            out = nullptr;
+
+            delete under_300m;
+            delete under_500m;
+            delete over_500m;
       }
       else if ((int) under_300m->getSize() >= 0.75 * vehicles_inside) {
             // all out
+            out = under_2km;
+            in  = nullptr;
+
+            delete under_300m;
+            delete under_500m;
+            delete over_500m;
       }
       else {
             // under 500 is in
             // over 500 is out
+            // what about both in and out?
+            // we only need to have one coordinate there
+            // what stupid
       }
+
+      auto rt_out = new ReturnType(out);
+      auto rt_in  = new ReturnType(in);
+      list->insertHead(rt_out);
+      list->insertHead(rt_in);
 
       // don't forget to delete data unused
       return {list};
 }
-ReturnType request7(VM_Request& req) {
+ReturnType request7(VM_Request& req, AVLTree<VM_Record>& records) {
       return {false};
 }
-ReturnType request8(VM_Request& req) {
+ReturnType request8(
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      AVLTree<string>&    restriction) {
       return {false};
 }
-ReturnType request9(VM_Request& req) {
+ReturnType request9(
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      AVLTree<string>&    restriction) {
       return {false};
 }
 
 
-bool print(ReturnType& r, VM_Request& req) {
+bool print(ReturnType& r, VM_Request& req, AVLTree<string>& restriction) {
       switch (r.t) {
             case ReturnType::type::empty:
                   return false;
@@ -488,11 +521,15 @@ bool print(ReturnType& r, VM_Request& req) {
                         for (auto& x : *r.l)
                               cout << " " << x;
 
-                  else
+                  else {
                         // list of tree ids
                         // <tree 1> - <tree 2>
-                        for (auto& x : *r.l)
-                              cout << x << " -";
+                        // check in restriction
+                        auto it = r.l->begin();
+                        (*(it++))->printTreeWithRestriction(restriction);
+                        cout << " -";
+                        (*it)->printTreeWithRestriction(restriction);
+                  }
 
                   cout << "\n";
                   return true;
