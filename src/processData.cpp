@@ -316,17 +316,6 @@ ReturnType request4(
                         break;
             }
       }
-#ifdef DEBUGGING
-      auto file = spdlog::get("file.log");
-      file->info("Request 4: {} vehicles", result.getSize());
-
-      string str;
-      for (auto& s : result) {
-            str += " " + s;
-      }
-
-      file->info("vehicles:\n{}", str);
-#endif
       return {(int) result.getSize()};
 }
 
