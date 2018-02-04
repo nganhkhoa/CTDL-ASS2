@@ -32,8 +32,8 @@ if [ $? -eq 0 ]; then
       teacher_time=$(($teacher_end-$teacher_start))
       diff_time=$(($teacher_time - $my_time))
 
-      echo "Your time:       $my_time"
-      echo "Teacher time:    $teacher_time"
-      echo "Time difference: $diff_time"
+      echo "Your time:       $my_time s"
+      echo "Teacher time:    $teacher_time s"
+      echo "Time difference: $diff_time s"
 fi
 
