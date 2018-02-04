@@ -41,24 +41,20 @@ void loadRequests(char* fName, L1List<VM_Request>& rList) {
       }
 
       string line;
-      bool   end;
-      while (getline(inFile, line, ' ')) {
 
-            if (line[line.length() - 1] == '\n')
-                  line.erase(line.length() - 1);
-            if (line[line.length() - 1] == '\r')
+      while (getline(inFile, line)) {
+            if (line[line.length() - 1] == ';')
                   line.erase(line.length() - 1);
 
-            if (line[line.length() - 1] == ';') {
-                  line.erase(line.length() - 1);
-                  end = true;
+            if (line.empty())
+                  continue;
+
+            istringstream iss(line);
+            while (getline(iss, line, ' ')) {
+                  VM_Request req(line);
+                  rList.insertHead(req);
             }
-
-            VM_Request req(line);
-            rList.insertHead(req);
-
-            if (end)
-                  break;
       }
+
       rList.reverse();
 }
