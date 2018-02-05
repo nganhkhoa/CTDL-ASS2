@@ -685,10 +685,10 @@ bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
                   if (r->l->isEmpty())
                         cout << " -1";
 
-                  else if (req.code[0] == 1)
+                  else if (req.code[0] == '1')
                         // list of request 1
                         for (auto& x : *(r->l))
-                              cout << " " << x;
+                              cout << *x;
 
                   else {
                         // list of tree ids
