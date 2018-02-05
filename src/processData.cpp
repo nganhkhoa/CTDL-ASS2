@@ -123,19 +123,19 @@ bool processRequest(
 
       switch (request.code[0] - '0') {
             case 1:
-                  r = request1(request, *records);
+                  r = request1(request, *records, *restriction);
                   break;
             case 2:
-                  r = request2(request, *records, vehicles_size);
+                  r = request2(request, *records, vehicles_size, *restriction);
                   break;
             case 3:
-                  r = request3(request, *records, vehicles_size);
+                  r = request3(request, *records, vehicles_size, *restriction);
                   break;
             case 4:
-                  r = request4(request, *records, vehicles_size);
+                  r = request4(request, *records, vehicles_size, *restriction);
                   break;
             case 5:
-                  r = request5(request, *records, *vehicles);
+                  r = request5(request, *records, *vehicles, *restriction);
                   break;
             case 6:
                   r = request6(request, *records);
@@ -147,7 +147,7 @@ bool processRequest(
                   r = request8(request, *records, *restriction);
                   break;
             case 9:
-                  r = request9(request, *records, *restriction);
+                  r = request9(request, *records, restriction);
                   break;
             default:
                   break;
@@ -157,7 +157,10 @@ bool processRequest(
 }
 
 
-ReturnType* request1(VM_Request& request, AVLTree<VM_Record>& records) {
+ReturnType* request1(
+      VM_Request&         request,
+      AVLTree<VM_Record>& records,
+      AVLTree<string>&    restriction) {
 
       if (records.isEmpty())
             return new ReturnType((int) -1);
@@ -186,13 +189,17 @@ ReturnType* request1(VM_Request& request, AVLTree<VM_Record>& records) {
       car_1.timestamp = timegm(thisTime);
       car_2.timestamp = timegm(thisTime);
 
+      // check in records
       VM_Record* ret_1 = nullptr;
       VM_Record* ret_2 = nullptr;
+      if (!records.find(car_1, ret_1) || !records.find(car_2, ret_2))
+            return new ReturnType((int) -1);
 
-      records.find(car_1, ret_1);
-      records.find(car_2, ret_2);
-
-      if (ret_1 == nullptr || ret_2 == nullptr)
+      // check in restriction
+      string* found = nullptr;
+      string  id_1(car_1.id);
+      string  id_2(car_2.id);
+      if (restriction.find(id_1, found) || restriction.find(id_2, found))
             return new ReturnType((int) -1);
 
       string relative_lat = ret_1->RelativeLatitudeTo(*ret_2);
@@ -214,7 +221,8 @@ ReturnType* request1(VM_Request& request, AVLTree<VM_Record>& records) {
 ReturnType* request2(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
-      const size_t&       vehicles_size) {
+      const size_t&       vehicles_size,
+      AVLTree<string>&    restriction) {
 
       if (records.isEmpty())
             return new ReturnType((int) 0);
@@ -229,23 +237,32 @@ ReturnType* request2(
       for (auto& r : records) {
             string relative_lon = r.RelativeLongitudeTo(lon);
             if (relative_lon[0] != direction) {
-                  string id(r.id);
+                  string  id(r.id);
+                  string* found = nullptr;
+
+                  // check in restriction
+                  if (restriction.find(id, found)) {
+                        continue;
+                  }
+
                   result.insert(id, [](string& Old, string& New) {
                         return Old == New;
                   });
 
-                  if (result.getSize() == vehicles_size)
+                  if (result.getSize() == vehicles_size - restriction.getSize())
                         break;
             }
       }
 
-      return new ReturnType((int) (vehicles_size - result.getSize()));
+      return new ReturnType(
+            (int) (vehicles_size - result.getSize() - restriction.getSize()));
 }
 
 ReturnType* request3(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
-      const size_t&       vehicles_size) {
+      const size_t&       vehicles_size,
+      AVLTree<string>&    restriction) {
 
       if (records.isEmpty())
             return new ReturnType((int) 0);
@@ -260,23 +277,32 @@ ReturnType* request3(
       for (auto& r : records) {
             string relative_lat = r.RelativeLatitudeTo(lat);
             if (relative_lat[0] != direction) {
-                  string id(r.id);
+                  string  id(r.id);
+                  string* found = nullptr;
+
+                  // check in restriction
+                  if (restriction.find(id, found)) {
+                        continue;
+                  }
+
                   result.insert(id, [](string& Old, string& New) {
                         return Old == New;
                   });
 
-                  if (result.getSize() == vehicles_size)
+                  if (result.getSize() == vehicles_size - restriction.getSize())
                         break;
             }
       }
 
-      return new ReturnType((int) (vehicles_size - result.getSize()));
+      return new ReturnType(
+            (int) (vehicles_size - result.getSize() - restriction.getSize()));
 }
 
 ReturnType* request4(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
-      const size_t&       vehicles_size) {
+      const size_t&       vehicles_size,
+      AVLTree<string>&    restriction) {
 
       if (records.isEmpty())
             return new ReturnType((int) 0);
@@ -313,12 +339,19 @@ ReturnType* request4(
             double distance = r.DistanceTo(lat, lon);
 
             if (distance <= radius) {
-                  string id(r.id);
+                  string  id(r.id);
+                  string* found = nullptr;
+
+                  // check in restriction
+                  if (restriction.find(id, found)) {
+                        continue;
+                  }
+
                   result.insert(id, [](string& Old, string& New) {
                         return Old == New;
                   });
 
-                  if (result.getSize() == vehicles_size)
+                  if (result.getSize() == vehicles_size - restriction.getSize())
                         break;
             }
       }
@@ -328,7 +361,8 @@ ReturnType* request4(
 ReturnType* request5(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
-      AVLTree<string>&    vehicles) {
+      AVLTree<string>&    vehicles,
+      AVLTree<string>&    restriction) {
 
       if (records.isEmpty())
             return new ReturnType((int) 0);
@@ -350,13 +384,12 @@ ReturnType* request5(
             return new ReturnType(false);
 
       string  id(char_id);
-      string* ret;
-      if (!vehicles.find(id, ret)) {
+      string* ret = nullptr;
+      if (!vehicles.find(id, ret) || restriction.find(id, ret)) {
             ret = nullptr;
             return new ReturnType(int(0));
       }
       ret = nullptr;
-
 
       int occurence = 0;
       for (auto& r : records) {
@@ -455,6 +488,10 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
             delete under_300m;
             delete under_500m;
             delete over_500m;
+
+            under_300m = nullptr;
+            under_500m = nullptr;
+            over_500m  = nullptr;
       }
       else if ((int) under_300m->getSize() >= 0.75 * vehicles_inside) {
             // all out
@@ -464,13 +501,33 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
             delete under_300m;
             delete under_500m;
             delete over_500m;
+
+            under_300m = nullptr;
+            under_500m = nullptr;
+            over_500m  = nullptr;
       }
       else {
-            // under 500 is in
-            // over 500 is out
-            // what about both in and out?
-            // we only need to have one coordinate there
-            // what stupid
+            // if any vehicle in both 500 above and below, choose 500 in
+            // that gives us a full in with 500 below
+            in = under_500m;
+            // besides, delete is odd, so we create new tree to make it easier
+            // if it's slower, than we will delete
+            out           = new AVLTree<string>();
+            string* found = nullptr;
+            for (auto& v : *over_500m) {
+                  if (in->find(v, found))
+                        continue;
+                  out->insert(v);
+            }
+            found = nullptr;
+
+            delete under_300m;
+            delete under_2km;
+            delete over_500m;
+
+            under_300m = nullptr;
+            under_2km  = nullptr;
+            over_500m  = nullptr;
       }
 
       auto rt_out = new ReturnType(out);
@@ -478,7 +535,7 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
       list->insertHead(rt_out);
       list->insertHead(rt_in);
 
-      // don't forget to delete data unused
+      // don't forget to delete unused data
       return new ReturnType(list);
 }
 ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
@@ -541,8 +598,66 @@ ReturnType* request8(
 ReturnType* request9(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
-      AVLTree<string>&    restriction) {
-      return new ReturnType(false);
+      AVLTree<string>*    restriction) {
+      if (records.isEmpty()) {
+            string ret = "-1";
+            return new ReturnType(ret);
+      }
+
+      int    req_id;
+      double lon;
+      double lat;
+      double radius;
+      int    hour;
+      int    minute;
+
+      if (sscanf(
+                req.code,
+                "%1d_%lf_%lf_%lf_%2d%2d",
+                &req_id,
+                &lon,
+                &lat,
+                &radius,
+                &hour,
+                &minute) != 6)
+            return new ReturnType(false);
+
+      auto resurrect = new AVLTree<string>();
+      for (auto& r : records) {
+            struct tm* tm = gmtime(&r.timestamp);
+            if (tm->tm_hour > hour)
+                  break;
+
+            if (tm->tm_hour < hour)
+                  continue;
+            if (tm->tm_min != minute)
+                  continue;
+
+            if (r.DistanceTo(lat, lon) > radius)
+                  continue;
+
+            string id(r.id);
+            resurrect->insert(
+                  id, [](string& Old, string& New) { return Old == New; });
+      }
+
+      auto    new_restriction = new AVLTree<string>();
+      auto    PrintList       = new AVLTree<string>();
+      string* found           = nullptr;
+      for (auto& r : *restriction) {
+            if (resurrect->find(r, found)) {
+                  PrintList->insert(
+                        r, [](string& Old, string& New) { return Old == New; });
+            }
+            else {
+                  new_restriction->insert(
+                        r, [](string& Old, string& New) { return Old == New; });
+            }
+      }
+      delete restriction;
+      restriction = new_restriction;
+
+      return new ReturnType(PrintList);
 }
 
 
