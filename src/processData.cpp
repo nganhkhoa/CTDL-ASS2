@@ -96,7 +96,7 @@ void releaseVMGlobalData(void* pGData) {
 }
 
 
-bool print(ReturnType&, VM_Request&, AVLTree<string>&);
+bool print(ReturnType*, VM_Request&, AVLTree<string>&);
 
 bool processRequest(
       VM_Request&        request,
@@ -119,7 +119,7 @@ bool processRequest(
 
       size_t vehicles_size = vehicles->getSize();
 
-      ReturnType* r;
+      ReturnType* r = nullptr;
 
       switch (request.code[0] - '0') {
             case 1:
@@ -157,16 +157,16 @@ bool processRequest(
 }
 
 
-ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
+ReturnType* request1(VM_Request& request, AVLTree<VM_Record>& records) {
 
       if (records.isEmpty())
-            return {(int) -1};
+            return new ReturnType((int) -1);
 
       auto sample   = *(records.begin());
       auto thisTime = gmtime(&sample.timestamp);
 
       if (thisTime == nullptr)
-            return {"cannot get time from data"};
+            return new ReturnType("cannot get time from data");
 
       VM_Record car_1, car_2;
 
@@ -181,7 +181,7 @@ ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
                 &thisTime->tm_min,     // minute
                 &thisTime->tm_sec)     // second
           != 6)
-            return {false};
+            return new ReturnType(false);
 
       car_1.timestamp = timegm(thisTime);
       car_2.timestamp = timegm(thisTime);
@@ -193,7 +193,7 @@ ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
       records.find(car_2, ret_2);
 
       if (ret_1 == nullptr || ret_2 == nullptr)
-            return {(int) -1};
+            return new ReturnType((int) -1);
 
       string relative_lat = ret_1->RelativeLatitudeTo(*ret_2);
       string relative_lon = ret_1->RelativeLongitudeTo(*ret_2);
@@ -208,22 +208,22 @@ ReturnType request1(VM_Request& request, AVLTree<VM_Record>& records) {
       ret->insertHead(lat);
       ret->insertHead(lon);
 
-      return {ret};
+      return new ReturnType(ret);
 }
 
-ReturnType request2(
+ReturnType* request2(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       const size_t&       vehicles_size) {
 
       if (records.isEmpty())
-            return {(int) 0};
+            return new ReturnType((int) 0);
 
       char   direction;
       int    req_id;
       double lon;
       if (sscanf(req.code, "%1d_%lf_%1[EW]", &req_id, &lon, &direction) != 3)
-            return {false};
+            return new ReturnType(false);
 
       AVLTree<string> result;
       for (auto& r : records) {
@@ -239,22 +239,22 @@ ReturnType request2(
             }
       }
 
-      return {(int) (vehicles_size - result.getSize())};
+      return new ReturnType((int) (vehicles_size - result.getSize()));
 }
 
-ReturnType request3(
+ReturnType* request3(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       const size_t&       vehicles_size) {
 
       if (records.isEmpty())
-            return {(int) 0};
+            return new ReturnType((int) 0);
 
       char   direction;
       int    req_id;
       double lat;
       if (sscanf(req.code, "%1d_%lf_%1[NS]", &req_id, &lat, &direction) != 3)
-            return {false};
+            return new ReturnType(false);
 
       AVLTree<string> result;
       for (auto& r : records) {
@@ -270,16 +270,16 @@ ReturnType request3(
             }
       }
 
-      return {(int) (vehicles_size - result.getSize())};
+      return new ReturnType((int) (vehicles_size - result.getSize()));
 }
 
-ReturnType request4(
+ReturnType* request4(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       const size_t&       vehicles_size) {
 
       if (records.isEmpty())
-            return {(int) 0};
+            return new ReturnType((int) 0);
 
       int    req_id;
       double lon;
@@ -297,7 +297,7 @@ ReturnType request4(
                 &radius,
                 &start,
                 &end) != 6)
-            return {false};
+            return new ReturnType(false);
 
       AVLTree<string> result;
       for (auto& r : records) {
@@ -322,16 +322,16 @@ ReturnType request4(
                         break;
             }
       }
-      return {(int) result.getSize()};
+      return new ReturnType((int) result.getSize());
 }
 
-ReturnType request5(
+ReturnType* request5(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       AVLTree<string>&    vehicles) {
 
       if (records.isEmpty())
-            return {(int) 0};
+            return new ReturnType((int) 0);
 
       int    req_id;
       char   char_id[ID_MAX_LENGTH];
@@ -347,13 +347,13 @@ ReturnType request5(
                 &lon,
                 &lat,
                 &radius) != 5)
-            return {false};
+            return new ReturnType(false);
 
       string  id(char_id);
       string* ret;
       if (!vehicles.find(id, ret)) {
             ret = nullptr;
-            return {int(0)};
+            return new ReturnType(int(0));
       }
       ret = nullptr;
 
@@ -369,12 +369,12 @@ ReturnType request5(
                   occurence++;
       }
 
-      return {occurence};
+      return new ReturnType(occurence);
 }
-ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
+ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
       if (records.isEmpty()) {
             string ret = "-1 - -1";
-            return {ret};
+            return new ReturnType(ret);
       }
 
       int    req_id;
@@ -393,7 +393,7 @@ ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
                 &vehicles_inside,
                 &hour,
                 &minute) != 6)
-            return {false};
+            return new ReturnType(false);
 
       auto under_2km  = new AVLTree<string>();
       auto under_300m = new AVLTree<string>();
@@ -479,19 +479,19 @@ ReturnType request6(VM_Request& req, AVLTree<VM_Record>& records) {
       list->insertHead(rt_in);
 
       // don't forget to delete data unused
-      return {list};
+      return new ReturnType(list);
 }
-ReturnType request7(VM_Request& req, AVLTree<VM_Record>& records) {
-      return {false};
+ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
+      return new ReturnType(false);
 }
-ReturnType request8(
+ReturnType* request8(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       AVLTree<string>&    restriction) {
 
       if (records.isEmpty()) {
             string ret = "-1";
-            return {ret};
+            return new ReturnType(ret);
       }
 
       int    req_id;
@@ -510,7 +510,7 @@ ReturnType request8(
                 &radius,
                 &hour,
                 &minute) != 6)
-            return {false};
+            return new ReturnType(false);
 
       auto this_restriction = new AVLTree<string>();
       for (auto& r : records) {
@@ -536,54 +536,65 @@ ReturnType request8(
       // this_restriction is for print out and stuff
       // restriction is for checking with other request
       // thus we need restriction to be avaiable all the time
-      return {this_restriction};
+      return new ReturnType(this_restriction);
 }
-ReturnType request9(
+ReturnType* request9(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       AVLTree<string>&    restriction) {
-      return {false};
+      return new ReturnType(false);
 }
 
 
-bool print(ReturnType& r, VM_Request& req, AVLTree<string>& restriction) {
-      switch (r.t) {
+bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
+      if (r == nullptr)
+            return false;
+
+      switch (r->t) {
             case ReturnType::type::empty:
+                  delete r;
                   return false;
 
             case ReturnType::type::boolean:
+                  delete r;
                   return false;
 
             case ReturnType::type::error:
-                  cout << r;
+                  cout << *r;
+                  delete r;
                   return false;
 
             case ReturnType::type::list:
                   cout << req.code[0] << ":";
 
-                  if (r.l->isEmpty())
+                  if (r->l->isEmpty())
                         cout << " -1";
 
                   else if (req.code[0] == 1)
                         // list of request 1
-                        for (auto& x : *r.l)
+                        for (auto& x : *(r->l))
                               cout << " " << x;
 
                   else {
                         // list of tree ids
                         // <tree 1> - <tree 2>
                         // check in restriction
-                        auto it = r.l->begin();
+                        auto it = r->l->begin();
                         (*(it++))->printTreeWithRestriction(restriction);
                         cout << " -";
                         (*it)->printTreeWithRestriction(restriction);
                   }
 
                   cout << "\n";
+                  delete r;
                   return true;
 
             default:
-                  cout << req.code[0] << ": " << r << "\n";
+                  // int
+                  // double
+                  // tree as list
+                  cout << req.code[0] << ":" << *r << "\n";
+                  delete r;
                   return true;
       }
 
