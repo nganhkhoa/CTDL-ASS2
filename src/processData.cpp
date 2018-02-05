@@ -119,7 +119,7 @@ bool processRequest(
 
       size_t vehicles_size = vehicles->getSize();
 
-      ReturnType r;
+      ReturnType* r;
 
       switch (request.code[0] - '0') {
             case 1:
@@ -488,7 +488,55 @@ ReturnType request8(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
       AVLTree<string>&    restriction) {
-      return {false};
+
+      if (records.isEmpty()) {
+            string ret = "-1";
+            return {ret};
+      }
+
+      int    req_id;
+      double lon;
+      double lat;
+      double radius;
+      int    hour;
+      int    minute;
+
+      if (sscanf(
+                req.code,
+                "%1d_%lf_%lf_%lf_%2d%2d",
+                &req_id,
+                &lon,
+                &lat,
+                &radius,
+                &hour,
+                &minute) != 6)
+            return {false};
+
+      auto this_restriction = new AVLTree<string>();
+      for (auto& r : records) {
+            struct tm* tm = gmtime(&r.timestamp);
+            if (tm->tm_hour > hour)
+                  break;
+
+            if (tm->tm_hour < hour)
+                  continue;
+            if (tm->tm_min != minute)
+                  continue;
+
+            if (r.DistanceTo(lat, lon) > radius)
+                  continue;
+
+            string id(r.id);
+            this_restriction->insert(
+                  id, [](string& Old, string& New) { return Old == New; });
+            restriction.insert(
+                  id, [](string& Old, string& New) { return Old == New; });
+      }
+
+      // this_restriction is for print out and stuff
+      // restriction is for checking with other request
+      // thus we need restriction to be avaiable all the time
+      return {this_restriction};
 }
 ReturnType request9(
       VM_Request&         req,
@@ -533,7 +581,6 @@ bool print(ReturnType& r, VM_Request& req, AVLTree<string>& restriction) {
 
                   cout << "\n";
                   return true;
-
 
             default:
                   cout << req.code[0] << ": " << r << "\n";
