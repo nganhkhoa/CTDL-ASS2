@@ -249,21 +249,21 @@ struct ReturnType
       friend std::ostream& operator<<(std::ostream& o, const ReturnType& r) {
             switch (r.t) {
                   case ReturnType::type::number:
-                        o << r.i;
+                        o << " " << r.i;
                         break;
 
                   case ReturnType::type::floatingpoint:
-                        o << r.d;
+                        o << " " << r.d;
                         break;
 
                   case ReturnType::type::string:
                         if (r.s != nullptr)
-                              o << *r.s;
+                              o << " " << *r.s;
                         break;
 
                   case ReturnType::type::tree:
                         if (r.tr == nullptr)
-                              o << "-1";
+                              o << " -1";
                         else if (r.tr->isEmpty())
                               o << " -1";
                         else
