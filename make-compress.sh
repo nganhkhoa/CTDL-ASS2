@@ -39,7 +39,7 @@ done
 
 echo 'zipping files'
 cd out
-zip ../dsa171a2.zip *
+zip ../src.zip *
 cd ..
 echo 'zipping done'
 
