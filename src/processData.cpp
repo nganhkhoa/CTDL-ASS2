@@ -437,13 +437,14 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
             auto open_time_tm     = gmtime(&r.timestamp);
             open_time_tm->tm_hour = hour;
             open_time_tm->tm_min  = minute;
+            open_time_tm->tm_sec  = 0;
 
             auto open_time = timegm(open_time_tm);
 
-            if (r.timestamp < open_time)
+            if (r.timestamp > open_time)
                   break;
 
-            if (r.timestamp - open_time > 60 * 15)
+            if (open_time - r.timestamp > 60 * 15)
                   continue;
 
             auto distance = r.DistanceTo(lat, lon);
@@ -539,6 +540,49 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
       return new ReturnType(list);
 }
 ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
+      if (records.isEmpty()) {
+            string ret = "-1 - -1";
+            return new ReturnType(ret);
+      }
+
+      int    req_id;
+      double lon;
+      double lat;
+      int    vehicles_inside;
+      double radius;
+      int    hour;
+      int    minute;
+
+      if (sscanf(
+                req.code,
+                "%1d_%lf_%lf_%d_%lf_%2d%2d",
+                &req_id,
+                &lon,
+                &lat,
+                &vehicles_inside,
+                &radius,
+                &hour,
+                &minute) != 6)
+            return new ReturnType(false);
+
+      struct id_dis
+      {
+            string id;
+            double distance;
+
+            bool operator<(id_dis dis) {
+                  if (distance == dis.distance) {
+                        return id < dis.id;
+                  }
+                  else
+                        return distance < dis.distance;
+            }
+
+            bool operator==(id_dis dis) {
+                  return id == dis.id;
+            }
+      };
+
       return new ReturnType(false);
 }
 ReturnType* request8(
