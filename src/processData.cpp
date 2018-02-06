@@ -189,17 +189,17 @@ ReturnType* request1(
       car_1.timestamp = timegm(thisTime);
       car_2.timestamp = timegm(thisTime);
 
-      // check in records
-      VM_Record* ret_1 = nullptr;
-      VM_Record* ret_2 = nullptr;
-      if (!records.find(car_1, ret_1) || !records.find(car_2, ret_2))
-            return new ReturnType((int) -1);
-
       // check in restriction
       string* found = nullptr;
       string  id_1(car_1.id);
       string  id_2(car_2.id);
       if (restriction.find(id_1, found) || restriction.find(id_2, found))
+            return new ReturnType((int) -1);
+
+      // check in records
+      VM_Record* ret_1 = nullptr;
+      VM_Record* ret_2 = nullptr;
+      if (!records.find(car_1, ret_1) || !records.find(car_2, ret_2))
             return new ReturnType((int) -1);
 
       string relative_lat = ret_1->RelativeLatitudeTo(*ret_2);
@@ -236,7 +236,7 @@ ReturnType* request2(
       AVLTree<string> result;
       for (auto& r : records) {
             string relative_lon = r.RelativeLongitudeTo(lon);
-            if (relative_lon[0] != direction) {
+            if (relative_lon[0] != direction && relative_lon[0] != '?') {
                   string  id(r.id);
                   string* found = nullptr;
 
@@ -276,7 +276,7 @@ ReturnType* request3(
       AVLTree<string> result;
       for (auto& r : records) {
             string relative_lat = r.RelativeLatitudeTo(lat);
-            if (relative_lat[0] != direction) {
+            if (relative_lat[0] != direction && relative_lat[0] != '?') {
                   string  id(r.id);
                   string* found = nullptr;
 
@@ -565,12 +565,12 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
                 &minute) != 6)
             return new ReturnType(false);
 
-      struct id_dis
+      struct id_distance
       {
             string id;
             double distance;
 
-            bool operator<(id_dis dis) {
+            bool operator<(id_distance dis) {
                   if (distance == dis.distance) {
                         return id < dis.id;
                   }
@@ -578,10 +578,56 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
                         return distance < dis.distance;
             }
 
-            bool operator==(id_dis dis) {
+            bool operator==(id_distance dis) {
                   return id == dis.id;
             }
       };
+
+      auto under_500m = new AVLTree<id_distance>();
+      auto under_1km  = new AVLTree<id_distance>();
+      auto over_1km   = new AVLTree<id_distance>();
+      auto under_2km  = new AVLTree<id_distance>();
+
+      for (auto& r : records) {
+            auto open_time_tm     = gmtime(&r.timestamp);
+            open_time_tm->tm_hour = hour;
+            open_time_tm->tm_min  = minute;
+            open_time_tm->tm_sec  = 0;
+
+            auto open_time = timegm(open_time_tm);
+
+            if (r.timestamp - open_time > 60 * 30)
+                  break;
+
+            if (r.timestamp < open_time)
+                  continue;
+
+            id_distance idis;
+            idis.distance = r.DistanceTo(lat, lon);
+            idis.id       = r.id;
+
+            if (idis.distance < 0.5) {
+                  under_500m->insert(idis);
+                  under_1km->insert(idis);
+                  under_2km->insert(idis);
+            }
+            else if (idis.distance < 1) {
+                  under_1km->insert(idis);
+                  under_2km->insert(idis);
+            }
+            else if (idis.distance < 2) {
+                  over_1km->insert(idis);
+                  under_2km->insert(idis);
+            }
+            else {
+                  continue;
+            }
+      }
+
+      if (under_500m->getSize() < 0.7 * vehicles_inside) {
+      }
+      else {
+      }
 
       return new ReturnType(false);
 }
