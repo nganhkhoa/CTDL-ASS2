@@ -37,6 +37,15 @@ fi
 cowsay "The request file data: $(cat $request)"
 
 ############### VARIABLES INIT #######################
+myapp=$pwd'/bin/dsa171a2'
+teacherapp=$pwd'/testapp/dsa171a2'
+
+if [ ! -f $teacherapp ]; then
+      cowsay -d "Teacher's testapp not found, atempt to download the file"
+      curl "https://github.com/nganhkhoa/CTDL-ASS2/raw/master/testapp/dsa171a2"
+      chmod +x $teacherfile
+fi
+
 mylog=$pwd'/testapp/my.log'
 teacherlog=$pwd'/testapp/teacher.log'
 mkdir -p $pwd/testapp/diff
@@ -46,7 +55,7 @@ difflog=$pwd'/testapp/diff/'$(date +"%Y-%m-%d_%H:%M:%S")'.log'
 ################## MY APP ###########################
 cowsay "Running my app...."
 my_start=$(date +%s)
-$pwd/bin/dsa171a2 $request $data > $mylog
+$myapp $request $data > $mylog
 if [ $? -ne 0 ]; then
       cowsay -d "My app run failed, I should have check it"
       rm -rf $mylog $teacherlog
@@ -58,7 +67,7 @@ my_end=$(date +%s)
 ################# TEACHER's APP ##########################
 cowsay "Running teacher's app...."
 teacher_start=$(date +%s)
-$pwd/testapp/dsa171a2 $request $data 2> /dev/null 1> $teacherlog
+$teacherapp $request $data 2> /dev/null 1> $teacherlog
 if [ $? -ne 0 ]; then
       cowsay -d "Teacher's app run failed. Aha, teacher has a bug"
       rm -rf $mylog $teacherlog
