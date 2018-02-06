@@ -112,10 +112,10 @@ bool processRequest(
       file->info("processing request {}", request.code);
 #endif
 
-      auto data        = (void**) pGData;
-      auto vehicles    = (AVLTree<string>*) data[0];
-      auto records     = (AVLTree<VM_Record>*) data[1];
-      auto restriction = (AVLTree<string>*) data[2];
+      auto  data        = (void**) pGData;
+      auto  vehicles    = (AVLTree<string>*) data[0];
+      auto  records     = (AVLTree<VM_Record>*) data[1];
+      auto& restriction = (AVLTree<string>*&) data[2];
 
       size_t vehicles_size = vehicles->getSize();
 
@@ -598,7 +598,7 @@ ReturnType* request8(
 ReturnType* request9(
       VM_Request&         req,
       AVLTree<VM_Record>& records,
-      AVLTree<string>*    restriction) {
+      AVLTree<string>*&   restriction) {
       if (records.isEmpty()) {
             string ret = "-1";
             return new ReturnType(ret);
