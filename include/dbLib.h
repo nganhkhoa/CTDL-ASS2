@@ -80,13 +80,17 @@ struct VM_Record
       }
 
       std::string RelativeLatitudeTo(double lat) {
-            if (latitude - lat >= 0)
+            if (latitude - lat == 0)
+                  return "?";
+            else if (latitude - lat > 0)
                   return "N";
             else
                   return "S";
       }
       std::string RelativeLongitudeTo(double lon) {
-            if (longitude - lon >= 0)
+            if (longitude - lon == 0)
+                  return "?";
+            else if (longitude - lon > 0)
                   return "E";
             else
                   return "W";
