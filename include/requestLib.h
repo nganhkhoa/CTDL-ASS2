@@ -283,10 +283,14 @@ struct ReturnType
       }
 
       void printTreeWithRestriction(AVLTree<string>& restriction) {
-            if (tr == nullptr)
+            if (tr == nullptr) {
+                  cout << " -1";
                   return;
-            else if (tr->isEmpty())
+            }
+            else if (tr->isEmpty()) {
+                  cout << " -1";
                   return;
+            }
             else {
                   string* ret = nullptr;
                   for (auto& x : *tr) {
