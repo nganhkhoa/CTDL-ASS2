@@ -43,6 +43,8 @@ void loadRequests(char* fName, L1List<VM_Request>& rList) {
       string line;
 
       while (getline(inFile, line)) {
+            if (line[line.length() - 1] == '\r')
+                  line.erase(line.length() - 1);
             if (line[line.length() - 1] == ';')
                   line.erase(line.length() - 1);
 
