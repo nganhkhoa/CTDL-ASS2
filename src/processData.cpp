@@ -391,15 +391,24 @@ ReturnType* request5(
       }
       ret = nullptr;
 
-      int occurence = 0;
+      int  occurence = 0;
+      bool isIn      = false;
       for (auto& r : records) {
             if (strcmp(r.id, char_id) != 0)
                   continue;
 
             double distance = r.DistanceTo(lat, lon);
 
-            if (distance <= radius)
+            if (isIn && distance > radius) {
+                  isIn = false;
+            }
+            else if (!isIn && distance <= radius) {
+                  isIn = true;
                   occurence++;
+            }
+            else {
+                  continue;
+            }
       }
 
       return new ReturnType(occurence);
@@ -616,7 +625,6 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
                   under_2km->insert(idis);
             }
             else if (idis.distance < 2) {
-                  over_1km->insert(idis);
                   under_2km->insert(idis);
             }
             else {
@@ -624,12 +632,25 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
             }
       }
 
+      AVLTree<string>* in  = nullptr;
+      AVLTree<string>* out = nullptr;
       if (under_500m->getSize() < 0.7 * vehicles_inside) {
+            // what get out?
+            // all but what all?
       }
       else {
+            // what get out?
+            // > 75% 1km-2km?
       }
 
-      return new ReturnType(false);
+      auto rt_out = new ReturnType(out);
+      auto rt_in  = new ReturnType(in);
+      auto list   = new L1List<ReturnType*>();
+      list->insertHead(rt_out);
+      list->insertHead(rt_in);
+
+      // don't forget to delete unused data
+      return new ReturnType(list);
 }
 ReturnType* request8(
       VM_Request&         req,
@@ -659,7 +680,8 @@ ReturnType* request8(
                 &minute) != 6)
             return new ReturnType(false);
 
-      auto this_restriction = new AVLTree<string>();
+      auto    this_restriction = new AVLTree<string>();
+      string* found            = nullptr;
       for (auto& r : records) {
             struct tm* tm = gmtime(&r.timestamp);
             if (tm->tm_hour > hour)
@@ -674,11 +696,16 @@ ReturnType* request8(
                   continue;
 
             string id(r.id);
+
+            if (restriction.find(id, found))
+                  continue;
+
             this_restriction->insert(
                   id, [](string& Old, string& New) { return Old == New; });
             restriction.insert(
                   id, [](string& Old, string& New) { return Old == New; });
       }
+      found = nullptr;
 
       // this_restriction is for print out and stuff
       // restriction is for checking with other request
@@ -798,7 +825,11 @@ bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
                   // int
                   // double
                   // tree as list
-                  cout << req.code[0] << ":" << *r << "\n";
+                  if ((req.code[0] == '8' || req.code[0] == '9') &&
+                      r->tr->isEmpty())
+                        cout << req.code[0] << ": 0\n";
+                  else
+                        cout << req.code[0] << ":" << *r << "\n";
                   delete r;
                   return true;
       }
