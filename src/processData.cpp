@@ -158,7 +158,7 @@ bool processRequest(
 
 
 ReturnType* request1(
-      VM_Request&         request,
+      VM_Request&         req,
       AVLTree<VM_Record>& records,
       AVLTree<string>&    restriction) {
 
@@ -168,22 +168,20 @@ ReturnType* request1(
       auto sample   = *(records.begin());
       auto thisTime = gmtime(&sample.timestamp);
 
-      if (thisTime == nullptr)
-            return new ReturnType("cannot get time from data");
-
       VM_Record car_1, car_2;
 
-      int req_id;
-      if (sscanf(    // 1_X_Y_hhmmss
-                request.code,
-                "%1d_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
-                &req_id,               // request id
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
+      if (sscanf(
+                s,
+                "_%16[a-zA-Z0-9]_%16[a-zA-Z0-9]_%2d%2d%2d",
                 car_1.id,              // id of vehicle number 1
                 car_2.id,              // id of vehicle number 2
                 &thisTime->tm_hour,    // hour
                 &thisTime->tm_min,     // minute
                 &thisTime->tm_sec)     // second
-          != 6)
+          != 5)
             return new ReturnType(false);
 
       car_1.timestamp = timegm(thisTime);
@@ -228,9 +226,12 @@ ReturnType* request2(
             return new ReturnType((int) 0);
 
       char   direction;
-      int    req_id;
       double lon;
-      if (sscanf(req.code, "%1d_%lf_%1[EW]", &req_id, &lon, &direction) != 3)
+
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
+      if (sscanf(s, "_%lf_%1[EW]", &lon, &direction) != 2)
             return new ReturnType(false);
 
       AVLTree<string> result;
@@ -268,9 +269,12 @@ ReturnType* request3(
             return new ReturnType((int) 0);
 
       char   direction;
-      int    req_id;
       double lat;
-      if (sscanf(req.code, "%1d_%lf_%1[NS]", &req_id, &lat, &direction) != 3)
+
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
+      if (sscanf(s, "_%lf_%1[NS]", &lat, &direction) != 2)
             return new ReturnType(false);
 
       AVLTree<string> result;
@@ -307,22 +311,17 @@ ReturnType* request4(
       if (records.isEmpty())
             return new ReturnType((int) 0);
 
-      int    req_id;
       double lon;
       double lat;
       double radius;
       int    start;
       int    end;
 
-      if (sscanf(
-                req.code,
-                "%1d_%lf_%lf_%lf_%d_%d",
-                &req_id,
-                &lon,
-                &lat,
-                &radius,
-                &start,
-                &end) != 6)
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
+      if (sscanf(s, "_%lf_%lf_%lf_%d_%d", &lon, &lat, &radius, &start, &end) !=
+          5)
             return new ReturnType(false);
 
       AVLTree<string> result;
@@ -367,20 +366,21 @@ ReturnType* request5(
       if (records.isEmpty())
             return new ReturnType((int) 0);
 
-      int    req_id;
       char   char_id[ID_MAX_LENGTH];
       double lat;
       double lon;
       double radius;
 
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
       if (sscanf(
-                req.code,
-                "%1d_%16[A-Za-z0-9]_%lf_%lf_%lf",
-                &req_id,
+                s,
+                "_%16[A-Za-z0-9]_%lf_%lf_%lf",
                 char_id,
                 &lon,
                 &lat,
-                &radius) != 5)
+                &radius) != 4)
             return new ReturnType(false);
 
       string  id(char_id);
@@ -419,22 +419,23 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
             return new ReturnType(ret);
       }
 
-      int    req_id;
       double lon;
       double lat;
       int    vehicles_inside;
       int    hour;
       int    minute;
 
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
       if (sscanf(
-                req.code,
-                "%1d_%lf_%lf_%d_%2d%2d",
-                &req_id,
+                s,
+                "_%lf_%lf_%d_%2d%2d",
                 &lon,
                 &lat,
                 &vehicles_inside,
                 &hour,
-                &minute) != 6)
+                &minute) != 5)
             return new ReturnType(false);
 
       auto under_2km  = new AVLTree<string>();
@@ -554,7 +555,6 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
             return new ReturnType(ret);
       }
 
-      int    req_id;
       double lon;
       double lat;
       int    vehicles_inside;
@@ -562,16 +562,18 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
       int    hour;
       int    minute;
 
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
       if (sscanf(
-                req.code,
-                "%1d_%lf_%lf_%d_%lf_%2d%2d",
-                &req_id,
+                s,
+                "_%lf_%lf_%d_%lf_%2d%2d",
                 &lon,
                 &lat,
                 &vehicles_inside,
                 &radius,
                 &hour,
-                &minute) != 6)
+                &minute) != 5)
             return new ReturnType(false);
 
       struct id_distance
@@ -594,7 +596,6 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
 
       auto under_500m = new AVLTree<id_distance>();
       auto under_1km  = new AVLTree<id_distance>();
-      auto over_1km   = new AVLTree<id_distance>();
       auto under_2km  = new AVLTree<id_distance>();
 
       for (auto& r : records) {
@@ -662,22 +663,23 @@ ReturnType* request8(
             return new ReturnType(ret);
       }
 
-      int    req_id;
       double lon;
       double lat;
       double radius;
       int    hour;
       int    minute;
 
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
       if (sscanf(
-                req.code,
-                "%1d_%lf_%lf_%lf_%2d%2d",
-                &req_id,
+                s,
+                "_%lf_%lf_%lf_%2d%2d",
                 &lon,
                 &lat,
                 &radius,
                 &hour,
-                &minute) != 6)
+                &minute) != 5)
             return new ReturnType(false);
 
       auto    this_restriction = new AVLTree<string>();
@@ -721,22 +723,23 @@ ReturnType* request9(
             return new ReturnType(ret);
       }
 
-      int    req_id;
       double lon;
       double lat;
       double radius;
       int    hour;
       int    minute;
 
+      auto s = strstr(req.code, "_");
+      if (s == nullptr)
+            return new ReturnType(false);
       if (sscanf(
-                req.code,
-                "%1d_%lf_%lf_%lf_%2d%2d",
-                &req_id,
+                s,
+                "_%lf_%lf_%lf_%2d%2d",
                 &lon,
                 &lat,
                 &radius,
                 &hour,
-                &minute) != 6)
+                &minute) != 5)
             return new ReturnType(false);
 
       auto resurrect = new AVLTree<string>();
@@ -782,6 +785,12 @@ bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
       if (r == nullptr)
             return false;
 
+      auto PrintRequestCode = [](VM_Request& req) {
+            for (size_t i = 0; req.code[i] != '_'; i++)
+                  cout << req.code[i];
+            cout << ":";
+      };
+
       switch (r->t) {
             case ReturnType::type::empty:
                   delete r;
@@ -797,7 +806,7 @@ bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
                   return false;
 
             case ReturnType::type::list:
-                  cout << req.code[0] << ":";
+                  PrintRequestCode(req);
 
                   if (r->l->isEmpty())
                         cout << " -1";
@@ -826,10 +835,14 @@ bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
                   // double
                   // tree as list
                   if ((req.code[0] == '8' || req.code[0] == '9') &&
-                      r->tr->isEmpty())
-                        cout << req.code[0] << ": 0\n";
-                  else
-                        cout << req.code[0] << ":" << *r << "\n";
+                      r->tr->isEmpty()) {
+                        PrintRequestCode(req);
+                        cout << " 0\n";
+                  }
+                  else {
+                        PrintRequestCode(req);
+                        cout << *r << "\n";
+                  }
                   delete r;
                   return true;
       }
