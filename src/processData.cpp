@@ -387,7 +387,7 @@ ReturnType* request5(
       string* ret = nullptr;
       if (!vehicles.find(id, ret) || restriction.find(id, ret)) {
             ret = nullptr;
-            return new ReturnType(int(0));
+            return new ReturnType(int(-1));
       }
       ret = nullptr;
 
