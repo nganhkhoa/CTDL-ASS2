@@ -138,7 +138,7 @@ bool processRequest(
                   r = request5(request, *records, *vehicles, *restriction);
                   break;
             case 6:
-                  r = request6(request, *records);
+                  r = request6(request, *records, *restriction);
                   break;
             case 7:
                   r = request7(request, *records);
@@ -413,7 +413,10 @@ ReturnType* request5(
 
       return new ReturnType(occurence);
 }
-ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
+ReturnType* request6(
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      AVLTree<string>&    restriction) {
       if (records.isEmpty()) {
             string ret = "-1 - -1";
             return new ReturnType(ret);
@@ -443,6 +446,7 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
       auto over_500m  = new AVLTree<string>();
       auto under_500m = new AVLTree<string>();
 
+      string* found = nullptr;
       for (auto& r : records) {
             auto open_time_tm     = gmtime(&r.timestamp);
             open_time_tm->tm_hour = hour;
@@ -460,20 +464,24 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
             auto distance = r.DistanceTo(lat, lon);
 
             string id(r.id);
-            auto   cmp = [](string& Old, string& New) { return Old == New; };
 
-            if (distance < 0.3) {
+            if (restriction.find(id, found))
+                  continue;
+
+            auto cmp = [](string& Old, string& New) { return Old == New; };
+
+            if (distance <= 0.3) {
                   under_300m->insert(id, cmp);
                   under_500m->insert(id, cmp);
                   under_2km->insert(id, cmp);
             }
 
-            else if (distance < 0.5) {
+            else if (distance <= 0.5) {
                   under_500m->insert(id, cmp);
                   under_2km->insert(id, cmp);
             }
 
-            else if (distance < 2) {
+            else if (distance <= 2) {
                   over_500m->insert(id, cmp);
                   under_2km->insert(id, cmp);
             }
@@ -487,10 +495,6 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
       AVLTree<string>* in   = nullptr;
       auto             list = new L1List<ReturnType*>();
 
-      // again, what is "in" and "out"
-      // is that only the vehicles in 15' prior to the time
-      // or all vehicles
-      // i have a confirm on that it is only 2km below
       if ((int) under_2km->getSize() < vehicles_inside) {
             // all in
             in  = under_2km;
@@ -504,7 +508,7 @@ ReturnType* request6(VM_Request& req, AVLTree<VM_Record>& records) {
             under_500m = nullptr;
             over_500m  = nullptr;
       }
-      else if ((int) under_300m->getSize() >= 0.75 * vehicles_inside) {
+      else if ((int) under_300m->getSize() > 0.75 * vehicles_inside) {
             // all out
             out = under_2km;
             in  = nullptr;
@@ -821,9 +825,11 @@ bool print(ReturnType* r, VM_Request& req, AVLTree<string>& restriction) {
                         // <tree 1> - <tree 2>
                         // check in restriction
                         auto it = r->l->begin();
-                        (*(it++))->printTreeWithRestriction(restriction);
+                        //    *it ---- ReturnType*
+                        // *(*it) ---- ReturnType
+                        cout << *(*(it++));
                         cout << " -";
-                        (*it)->printTreeWithRestriction(restriction);
+                        cout << *(*it);
                   }
 
                   cout << "\n";
