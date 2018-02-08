@@ -292,11 +292,16 @@ struct ReturnType
                   return;
             }
             else {
-                  string* ret = nullptr;
+                  string* ret     = nullptr;
+                  bool    isPrint = false;
                   for (auto& x : *tr) {
                         if (restriction.find(x, ret))
                               continue;
                         cout << " " << x;
+                        isPrint = true;
+                  }
+                  if (!isPrint) {
+                        cout << " -1";
                   }
             }
       }
