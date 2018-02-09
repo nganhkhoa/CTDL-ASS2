@@ -161,7 +161,7 @@ ReturnType* request5(
       AVLTree<string>&,
       AVLTree<string>&);
 ReturnType* request6(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
-ReturnType* request7(VM_Request&, AVLTree<VM_Record>&);
+ReturnType* request7(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
 ReturnType* request8(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>&);
 ReturnType* request9(VM_Request&, AVLTree<VM_Record>&, AVLTree<string>*&);
 
