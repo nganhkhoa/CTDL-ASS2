@@ -141,7 +141,7 @@ bool processRequest(
                   r = request6(request, *records, *restriction);
                   break;
             case 7:
-                  r = request7(request, *records);
+                  r = request7(request, *records, *restriction);
                   break;
             case 8:
                   r = request8(request, *records, *restriction);
@@ -446,7 +446,6 @@ ReturnType* request6(
       auto over_500m  = new AVLTree<string>();
       auto under_500m = new AVLTree<string>();
 
-      string* found = nullptr;
       for (auto& r : records) {
             auto open_time_tm     = gmtime(&r.timestamp);
             open_time_tm->tm_hour = hour;
@@ -463,7 +462,8 @@ ReturnType* request6(
 
             auto distance = r.DistanceTo(lat, lon);
 
-            string id(r.id);
+            string  id(r.id);
+            string* found = nullptr;
 
             if (restriction.find(id, found))
                   continue;
@@ -553,7 +553,10 @@ ReturnType* request6(
       // don't forget to delete unused data
       return new ReturnType(list);
 }
-ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
+ReturnType* request7(
+      VM_Request&         req,
+      AVLTree<VM_Record>& records,
+      AVLTree<string>&    restriction) {
       if (records.isEmpty()) {
             string ret = "-1 - -1";
             return new ReturnType(ret);
@@ -577,7 +580,7 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
                 &vehicles_inside,
                 &radius,
                 &hour,
-                &minute) != 5)
+                &minute) != 6)
             return new ReturnType(false);
 
       struct id_distance
@@ -585,23 +588,17 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
             string id;
             double distance;
 
-            bool operator<(id_distance dis) {
-                  if (distance == dis.distance) {
-                        return id < dis.id;
-                  }
-                  else
-                        return distance < dis.distance;
+            bool operator<(id_distance idis) {
+                  return id < idis.id;
             }
 
-            bool operator==(id_distance dis) {
-                  return id == dis.id;
+            bool operator==(id_distance idis) {
+                  return id == idis.id;
             }
       };
 
-      auto under_500m = new AVLTree<id_distance>();
-      auto under_1km  = new AVLTree<id_distance>();
-      auto under_2km  = new AVLTree<id_distance>();
-
+      AVLTree<id_distance> min_distance;
+      AVLTree<id_distance> max_distance;
       for (auto& r : records) {
             auto open_time_tm     = gmtime(&r.timestamp);
             open_time_tm->tm_hour = hour;
@@ -610,7 +607,7 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
 
             auto open_time = timegm(open_time_tm);
 
-            if (r.timestamp - open_time > 60 * 30)
+            if (r.timestamp > open_time + 60 * 30)
                   break;
 
             if (r.timestamp < open_time)
@@ -619,33 +616,130 @@ ReturnType* request7(VM_Request& req, AVLTree<VM_Record>& records) {
             id_distance idis;
             idis.distance = r.DistanceTo(lat, lon);
             idis.id       = r.id;
+            string* found = nullptr;
 
-            if (idis.distance < 0.5) {
-                  under_500m->insert(idis);
-                  under_1km->insert(idis);
-                  under_2km->insert(idis);
-            }
-            else if (idis.distance < 1) {
-                  under_1km->insert(idis);
-                  under_2km->insert(idis);
-            }
-            else if (idis.distance < 2) {
-                  under_2km->insert(idis);
+            if (restriction.find(idis.id, found))
+                  continue;
+
+            id_distance* found_re = nullptr;
+            if (min_distance.find(idis, found_re)) {
+                  if (idis.distance < found_re->distance)
+                        found_re->distance = idis.distance;
             }
             else {
-                  continue;
+                  min_distance.insert(
+                        idis, [](id_distance& Old, id_distance& New) {
+                              return Old == New;
+                        });
             }
+
+            if (max_distance.find(idis, found_re)) {
+                  if (idis.distance > found_re->distance)
+                        found_re->distance = idis.distance;
+            }
+            else {
+                  max_distance.insert(
+                        idis, [](id_distance& Old, id_distance& New) {
+                              return Old == New;
+                        });
+            }
+      }
+
+      auto under_500m = new AVLTree<string>();
+      auto under_1km  = new AVLTree<string>();
+      auto under_2km  = new AVLTree<id_distance>();
+
+      for (auto& idis : min_distance) {
+            if (idis.distance <= 0.5)
+                  under_500m->insert(idis.id);
+            if (idis.distance <= 1)
+                  under_1km->insert(idis.id);
+            if (idis.distance <= 2)
+                  under_2km->insert(idis);
       }
 
       AVLTree<string>* in  = nullptr;
       AVLTree<string>* out = nullptr;
+
+      auto make_string_tree =
+            [](AVLTree<id_distance>* tree) -> AVLTree<string>* {
+            if (tree == nullptr)
+                  return nullptr;
+            auto ret = new AVLTree<string>();
+            for (auto& t : *tree)
+                  ret->insert(t.id);
+            return ret;
+      };
+
       if (under_500m->getSize() < 0.7 * vehicles_inside) {
-            // what get out?
-            // all but what all?
+            out = make_string_tree(under_2km);
+            in  = nullptr;
+
+            delete under_500m;
+            delete under_1km;
+            delete under_2km;
+
+            under_500m = nullptr;
+            under_1km  = nullptr;
+            under_2km  = nullptr;
       }
       else {
-            // what get out?
-            // > 75% 1km-2km?
+            // in  = under_1km;    // and 25% of 1-2km
+            in  = under_1km;
+            out = new AVLTree<string>();
+
+            struct distance_id
+            {
+                  string id;
+                  double distance;
+
+                  bool operator<(distance_id disid) {
+                        // because we want max -> min
+                        // in LNR order
+                        return distance > disid.distance;
+                  }
+
+                  bool operator==(distance_id disid) {
+                        return distance == disid.distance;
+                  }
+            };
+
+            // get list id by distance order LNR max->min
+            // only id with distance > 1 and <= 2
+            // because we add all <= 1 in IN list already
+            AVLTree<distance_id> distance_order;
+            for (auto& idis : *under_2km) {
+                  if (idis.distance <= 1)
+                        continue;
+                  if (idis.distance > 2)
+                        continue;
+                  string* found = nullptr;
+                  if (in->find(idis.id, found))
+                        continue;
+
+                  distance_id disid;
+                  disid.id       = idis.id;
+                  disid.distance = idis.distance;
+                  distance_order.insert(disid);
+            }
+
+            int size  = distance_order.getSize();
+            int count = 0;
+            for (auto& disid : distance_order) {
+                  if (count++ <= (double) (0.75 * size)) {
+                        // out->insert(disid.id);
+                  }
+                  else {
+                        // in->insert(disid.id);
+                  }
+            }
+
+            delete under_500m;
+            delete under_2km;
+
+            under_500m = nullptr;
+            under_1km  = nullptr;
+            under_2km  = nullptr;
       }
 
       auto rt_out = new ReturnType(out);
