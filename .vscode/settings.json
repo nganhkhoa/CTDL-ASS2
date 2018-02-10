@@ -38,7 +38,8 @@
             "hash_set": "cpp",
             "string_view": "cpp",
             "utility": "cpp",
-            "thread": "cpp"
+            "thread": "cpp",
+            "chrono": "cpp"
       },
       "files.exclude": {
             "include/googletest": true,
