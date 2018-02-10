@@ -10,8 +10,8 @@ set (Request_Test
 )
 
 set (ALL_TEST
-      ${DATA_STRUCTURE_TEST}
-      ${Request_Test}
+      # ${DATA_STRUCTURE_TEST}
+      # ${Request_Test}
 )
 
 project(${TEST_NAME})

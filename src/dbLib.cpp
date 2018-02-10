@@ -87,20 +87,19 @@ bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
 
       const char* temp = pBuf;
 
-      if (
-         sscanf(
-            temp,
-            "%d,%d/%d/%d %d:%d:%d,%16[a-zA-Z0-9],%lF,%lF,%*s",
-            &rev,
-            &thisTime.tm_mon,
-            &thisTime.tm_mday,
-            &thisTime.tm_year,
-            &thisTime.tm_hour,
-            &thisTime.tm_min,
-            &thisTime.tm_sec,
-            bInfo.id,
-            &bInfo.longitude,
-            &bInfo.latitude) != 10)
+      if (sscanf(
+                temp,
+                "%d,%d/%d/%d %d:%d:%d,%16[a-zA-Z0-9],%lF,%lF,%*s",
+                &rev,
+                &thisTime.tm_mon,
+                &thisTime.tm_mday,
+                &thisTime.tm_year,
+                &thisTime.tm_hour,
+                &thisTime.tm_min,
+                &thisTime.tm_sec,
+                bInfo.id,
+                &bInfo.longitude,
+                &bInfo.latitude) != 10)
             return false;
 
       thisTime.tm_year -= 1900;
@@ -114,6 +113,8 @@ bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
 #endif
 
       // pading zeros in
+      /*
+      // don't do this anymore
       size_t idlength = strlen(bInfo.id);
       if (idlength < 4) {
             memmove(bInfo.id + 4 - idlength, bInfo.id, 4);
@@ -121,6 +122,7 @@ bool parseVMRecord(char* pBuf, VM_Record& bInfo) {
                   bInfo.id[4 - idlength - 1] = '0';
             }
       }
+      //*/
 
       return true;
 }
@@ -140,11 +142,11 @@ void process(L1List<VM_Request>& requestList, L1List<VM_Record>& rList) {
 
 void printVMRecord(VM_Record& b) {
       printf(
-         "%s: (%0.5f, %0.5f), %s\n",
-         b.id,
-         b.longitude,
-         b.latitude,
-         ctime(&b.timestamp));
+            "%s: (%0.5f, %0.5f), %s\n",
+            b.id,
+            b.longitude,
+            b.latitude,
+            ctime(&b.timestamp));
 }
 
 /// This function converts decimal degrees to radians

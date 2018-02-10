@@ -24,14 +24,14 @@ inc=(dbLib.h dsaLib.h requestLib.h)
 
 # resolve include path
 for i in ${src[*]}; do
-      echo 'get ' $i '.cpp'
+      echo 'get ' $i
       sed s/\<dsaLib.h\>/\"dsaLib.h\"/ src/"$i" | \
       sed s/\<dbLib.h\>/\"dbLib.h\"/ | \
       sed s/\<requestLib.h\>/\"requestLib.h\"/ > out/"$i"
 done
 
 for i in ${inc[*]}; do
-      echo 'get ' $i '.h'
+      echo 'get ' $i
       sed s/\<dsaLib.h\>/\"dsaLib.h\"/ include/"$i" | \
       sed s/\<dbLib.h\>/\"dbLib.h\"/ | \
       sed s/\<requestLib.h\>/\"requestLib.h\"/ > out/"$i"
@@ -39,7 +39,7 @@ done
 
 echo 'zipping files'
 cd out
-zip ../dsa171a2.zip *
+zip ../src.zip *
 cd ..
 echo 'zipping done'
 

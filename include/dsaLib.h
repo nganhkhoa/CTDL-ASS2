@@ -371,8 +371,8 @@ struct AVLNode
 
       void calibrate() {
             this->_height = [](int a, int b) { return a > b ? a : b; }(
-                               (_pLeft ? _pLeft->_height : 0),
-                               (_pRight ? _pRight->_height : 0)) +
+                                  (_pLeft ? _pLeft->_height : 0),
+                                  (_pRight ? _pRight->_height : 0)) +
                             1;
       }
 };
@@ -705,10 +705,10 @@ bool AVLTree<T>::balance(AVLNode<T>*& n) {
 
 template <class T>
 bool AVLTree<T>::insert(
-   AVLNode<T>*& n,
-   AVLNode<T>*  pP,
-   T&           t,
-   bool (*cmp)(T&, T&)) {
+      AVLNode<T>*& n,
+      AVLNode<T>*  pP,
+      T&           t,
+      bool (*cmp)(T&, T&)) {
 
       if (n == nullptr) {
             n = new AVLNode<T>(t, pP);
