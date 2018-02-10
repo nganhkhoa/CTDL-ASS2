@@ -491,14 +491,17 @@ ReturnType* request6(
             }
       }
 
-      AVLTree<string>* out  = nullptr;
-      AVLTree<string>* in   = nullptr;
-      auto             list = new L1List<ReturnType*>();
+      ReturnType* rt_out = nullptr;
+      ReturnType* rt_in  = nullptr;
+      auto        list   = new L1List<ReturnType*>();
 
       if ((int) under_2km->getSize() < vehicles_inside) {
             // all in
-            in  = under_2km;
-            out = nullptr;
+            if (under_2km->isEmpty())
+                  rt_in = new ReturnType("");
+            else
+                  rt_in = new ReturnType(under_2km);
+            rt_out = new ReturnType("-1");
 
             delete under_300m;
             delete under_500m;
@@ -510,8 +513,11 @@ ReturnType* request6(
       }
       else if ((int) under_300m->getSize() > 0.75 * vehicles_inside) {
             // all out
-            out = under_2km;
-            in  = nullptr;
+            if (under_2km->isEmpty())
+                  rt_out = new ReturnType("");
+            else
+                  rt_out = new ReturnType(under_2km);
+            rt_in = new ReturnType("-1");
 
             delete under_300m;
             delete under_500m;
@@ -524,17 +530,18 @@ ReturnType* request6(
       else {
             // if any vehicle in both 500 above and below, choose 500 in
             // that gives us a full in with 500 below
-            in = under_500m;
+            rt_in = new ReturnType(under_500m);
             // besides, delete is odd, so we create new tree to make it easier
             // if it's slower, than we will delete
-            out           = new AVLTree<string>();
+            auto    out   = new AVLTree<string>();
             string* found = nullptr;
             for (auto& v : *over_500m) {
-                  if (in->find(v, found))
+                  if (under_500m->find(v, found))
                         continue;
                   out->insert(v);
             }
-            found = nullptr;
+            found  = nullptr;
+            rt_out = new ReturnType(out);
 
             delete under_300m;
             delete under_2km;
@@ -545,8 +552,6 @@ ReturnType* request6(
             over_500m  = nullptr;
       }
 
-      auto rt_out = new ReturnType(out);
-      auto rt_in  = new ReturnType(in);
       list->insertHead(rt_out);
       list->insertHead(rt_in);
 
@@ -618,6 +623,9 @@ ReturnType* request7(
             idis.id       = r.id;
             string* found = nullptr;
 
+            if (idis.distance > 2)
+                  continue;
+
             if (restriction.find(idis.id, found))
                   continue;
 
@@ -633,6 +641,8 @@ ReturnType* request7(
                         });
             }
 
+            if (idis.distance < 1)
+                  continue;
             if (max_distance.find(idis, found_re)) {
                   if (idis.distance > found_re->distance)
                         found_re->distance = idis.distance;
@@ -647,15 +657,12 @@ ReturnType* request7(
 
       auto under_500m = new AVLTree<string>();
       auto under_1km  = new AVLTree<string>();
-      auto under_2km  = new AVLTree<id_distance>();
 
       for (auto& idis : min_distance) {
             if (idis.distance <= 0.5)
                   under_500m->insert(idis.id);
             if (idis.distance <= 1)
                   under_1km->insert(idis.id);
-            if (idis.distance <= 2)
-                  under_2km->insert(idis);
       }
 
       AVLTree<string>* in  = nullptr;
@@ -672,20 +679,17 @@ ReturnType* request7(
       };
 
       if (under_500m->getSize() < 0.7 * vehicles_inside) {
-            out = make_string_tree(under_2km);
+            out = make_string_tree(&min_distance);
             in  = nullptr;
 
             delete under_500m;
             delete under_1km;
-            delete under_2km;
 
             under_500m = nullptr;
             under_1km  = nullptr;
-            under_2km  = nullptr;
       }
       else {
-            // in  = under_1km;    // and 25% of 1-2km
-            in  = under_1km;
+            in  = under_1km;    // and 25% of 1-2km
             out = new AVLTree<string>();
 
             struct distance_id
@@ -708,11 +712,12 @@ ReturnType* request7(
             // only id with distance > 1 and <= 2
             // because we add all <= 1 in IN list already
             AVLTree<distance_id> distance_order;
-            for (auto& idis : *under_2km) {
-                  if (idis.distance <= 1)
+            for (auto& idis : max_distance) {
+                  if (idis.distance < 1)
                         continue;
                   if (idis.distance > 2)
                         continue;
+
                   string* found = nullptr;
                   if (in->find(idis.id, found))
                         continue;
@@ -724,22 +729,20 @@ ReturnType* request7(
             }
 
             int size  = distance_order.getSize();
-            int count = 0;
+            int count = 1;
             for (auto& disid : distance_order) {
                   if (count++ <= (double) (0.75 * size)) {
-                        // out->insert(disid.id);
+                        out->insert(disid.id);
                   }
                   else {
-                        // in->insert(disid.id);
+                        in->insert(disid.id);
                   }
             }
 
             delete under_500m;
-            delete under_2km;
 
             under_500m = nullptr;
             under_1km  = nullptr;
-            under_2km  = nullptr;
       }
 
       auto rt_out = new ReturnType(out);

@@ -235,7 +235,12 @@ struct ReturnType
             this->i = i;
       }
 
-      ReturnType(std::string& s) {
+      ReturnType(const std::string& s) {
+            t       = type::string;
+            this->s = new string(s);
+      }
+
+      ReturnType(const char* s) {
             t       = type::string;
             this->s = new string(s);
       }
