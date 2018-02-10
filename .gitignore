@@ -19,6 +19,8 @@
 # ignore vim swap files
 */*.swp
 /*.swp
+# and vim session file
+Session.vim
 
 # exception
 !cppcheck.log

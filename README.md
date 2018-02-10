@@ -49,6 +49,7 @@ và không có dấu khoảng trắng ở cuối danh sách. Các phần tử tr
 tuân theo quy tắc về số nguyên và số thực ở trên.
 
 ## 3. Quy ước và yêu cầu
+
 ### 3.1. Quy ước
 - Phương tiện được xem là đang đứng yên nếu trong hai lần liên tiếp mà
 	tọa độ GPS có độ lệch từ 5m (`<= 5m`) trở xuống.
@@ -66,7 +67,9 @@ tuân theo quy tắc về số nguyên và số thực ở trên.
 	so với vị trí Y `(long_Y, lat_Y)` nếu `lat_X - lat_Y >= 0`
 	hoặc nằm về phía Nam (South, được kí hiệu bởi kí tự 'S' khi xuất kết quả)
 	nếu ngược lại.
+
 ### 3.2. Yêu cầu truy xuất
+
 Các yêu cầu truy xuất có mã và mô tả về việc truy xuất lần lượt sau đây:
 1. **Xác định vị trí tương đối và khoảng cách của hai phương tiện
 		tại một thời điểm**

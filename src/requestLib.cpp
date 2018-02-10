@@ -36,23 +36,25 @@ void loadRequests(char* fName, L1List<VM_Request>& rList) {
       ifstream inFile(fName);
 
       if (!inFile) {
-            cout << "The file is not found!";
+            cout << "The file is not found!\n";
             return;
       }
 
       string line;
-      bool   end;
-      while (getline(inFile, line, ' ')) {
-            if (line[line.length() - 1] == ';') {
+
+      while (getline(inFile, line)) {
+            if (line[line.length() - 1] == ';')
                   line.erase(line.length() - 1);
-                  end = true;
+
+            if (line.empty())
+                  continue;
+
+            istringstream iss(line);
+            while (getline(iss, line, ' ')) {
+                  VM_Request req(line);
+                  rList.insertHead(req);
             }
-
-            VM_Request req(line);
-            rList.insertHead(req);
-
-            if (end)
-                  break;
       }
+
       rList.reverse();
 }

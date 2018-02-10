@@ -45,6 +45,10 @@ RUN   apt-get -qq update \
       # go back and delete source files
       #
       && cd /dsa171a2/ \
+      # test with teacher app
+      # build failed on Docker
+      # && chmod +x test.sh \
+      # && ./test.sh \
       # remove the folders so no one can see it
       && rm -rf src/ include/ test/ out/ build/
 

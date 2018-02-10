@@ -6,6 +6,9 @@
       "editor.detectIndentation": false,
       "editor.formatOnSave": true,
       "files.associations": {
+            "*.m": "matlab",
+            "*.mpl": "maple",
+            "*.csproj": "xml",
             "*.tcc": "cpp",
             "cctype": "cpp",
             "clocale": "cpp",
@@ -34,7 +37,8 @@
             "hash_map": "cpp",
             "hash_set": "cpp",
             "string_view": "cpp",
-            "utility": "cpp"
+            "utility": "cpp",
+            "thread": "cpp"
       },
       "files.exclude": {
             "include/googletest": true,
